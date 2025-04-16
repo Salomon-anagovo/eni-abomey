@@ -1,0 +1,59 @@
+<% if (messages.error || messages.success || messages.info || messages.warning) { %>
+  <div class="container mt-3">
+      <% if (messages.error) { %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                  <div><%= messages.error %></div>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+      <% } %>
+
+      <% if (messages.success) { %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <div class="d-flex align-items-center">
+                  <i class="bi bi-check-circle-fill me-2"></i>
+                  <div><%= messages.success %></div>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+      <% } %>
+
+      <% if (messages.info) { %>
+          <div class="alert alert-info alert-dismissible fade show" role="alert">
+              <div class="d-flex align-items-center">
+                  <i class="bi bi-info-circle-fill me-2"></i>
+                  <div><%= messages.info %></div>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+      <% } %>
+
+      <% if (messages.warning) { %>
+          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+              <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                  <div><%= messages.warning %></div>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+      <% } %>
+
+      <!-- Toast notification (optionnel) -->
+      <% if (messages.toast) { %>
+          <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+              <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="toast-header bg-primary text-white">
+                      <strong class="me-auto">Notification</strong>
+                      <small>À l'instant</small>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                  <div class="toast-body">
+                      <%= messages.toast %>
+                  </div>
+              </div>
+          </div>
+      <% } %>
+  </div>
+<% } %>

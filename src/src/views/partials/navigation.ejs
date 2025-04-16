@@ -1,0 +1,88 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid">
+      <button class="navbar-toggler ms-auto" type="button" 
+              data-bs-toggle="collapse" data-bs-target="#mainNav">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <!-- Menu principal -->
+              <li class="nav-item">
+                  <a class="nav-link <%= currentPath === '/' ? 'active' : '' %>" href="/">
+                      <i class="bi bi-house-door me-1"></i> Accueil
+                  </a>
+              </li>
+
+              <!-- Menu Élèves -->
+              <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle <%= currentPath.startsWith('/eleves') ? 'active' : '' %>" 
+                     href="#" id="elevesDropdown" role="button" 
+                     data-bs-toggle="dropdown">
+                      <i class="bi bi-people me-1"></i> Élèves
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="elevesDropdown">
+                      <li><a class="dropdown-item" href="/eleves">
+                          <i class="bi bi-list-ul me-1"></i> Liste des élèves
+                      </a></li>
+                      <li><a class="dropdown-item" href="/eleves/new">
+                          <i class="bi bi-plus-circle me-1"></i> Ajouter un élève
+                      </a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="/eleves/import">
+                          <i class="bi bi-upload me-1"></i> Importer
+                      </a></li>
+                  </ul>
+              </li>
+
+              <!-- Menu Formateurs -->
+              <li class="nav-item">
+                  <a class="nav-link <%= currentPath.startsWith('/formateurs') ? 'active' : '' %>" 
+                     href="/formateurs">
+                      <i class="bi bi-person-badge me-1"></i> Formateurs
+                  </a>
+              </li>
+
+              <!-- Menu Notes -->
+              <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle <%= currentPath.startsWith('/notes') ? 'active' : '' %>" 
+                     href="#" id="notesDropdown" role="button" 
+                     data-bs-toggle="dropdown">
+                      <i class="bi bi-journal-text me-1"></i> Notes
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="notesDropdown">
+                      <li><a class="dropdown-item" href="/notes/saisie">
+                          <i class="bi bi-pencil-square me-1"></i> Saisie des notes
+                      </a></li>
+                      <li><a class="dropdown-item" href="/notes/bulletins">
+                          <i class="bi bi-file-earmark-text me-1"></i> Bulletins
+                      </a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="/notes/statistiques">
+                          <i class="bi bi-graph-up me-1"></i> Statistiques
+                      </a></li>
+                  </ul>
+              </li>
+
+              <!-- Menu Bibliothèque -->
+              <li class="nav-item">
+                  <a class="nav-link <%= currentPath.startsWith('/bibliotheque') ? 'active' : '' %>" 
+                     href="/bibliotheque">
+                      <i class="bi bi-book me-1"></i> Bibliothèque
+                  </a>
+              </li>
+          </ul>
+
+          <!-- Barre de recherche -->
+          <form class="d-flex ms-2" action="/search" method="GET">
+              <div class="input-group">
+                  <input class="form-control form-control-sm" type="search" 
+                         placeholder="Rechercher..." name="q">
+                  <button class="btn btn-sm btn-outline-light" type="submit">
+                      <i class="bi bi-search"></i>
+                  </button>
+              </div>
+          </form>
+      </div>
+  </div>
+</nav>
