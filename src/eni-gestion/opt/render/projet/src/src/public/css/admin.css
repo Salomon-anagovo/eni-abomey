@@ -1,0 +1,95 @@
+/* ========== ADMIN OVERRIDES ========== */
+.admin-layout {
+  background-color: #f5f7fa;
+}
+
+#sidebar {
+  background-color: #2c3e50;
+  color: white;
+  min-height: calc(100vh - 56px);
+  padding: 0;
+}
+
+#sidebar .nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  padding: var(--space-md);
+  border-left: 3px solid transparent;
+}
+
+#sidebar .nav-link:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#sidebar .nav-link.active {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-left: 3px solid var(--primary-color);
+}
+
+#sidebar .nav-link i {
+  margin-right: var(--space-sm);
+  width: 20px;
+  text-align: center;
+}
+
+.admin-content {
+  padding: var(--space-lg);
+}
+
+/* Dashboard Widgets */
+.dashboard-widget {
+  border-radius: 8px;
+  padding: var(--space-md);
+  color: white;
+  margin-bottom: var(--space-lg);
+  transition: transform 0.3s ease;
+}
+
+.dashboard-widget:hover {
+  transform: translateY(-5px);
+}
+
+.widget-primary {
+  background-color: var(--primary-color);
+  border-left: 5px solid var(--primary-dark);
+}
+
+.widget-success {
+  background-color: var(--secondary-color);
+  border-left: 5px solid #27ae60;
+}
+
+.widget-danger {
+  background-color: var(--danger-color);
+  border-left: 5px solid #c0392b;
+}
+
+.widget-warning {
+  background-color: var(--warning-color);
+  border-left: 5px solid #d35400;
+}
+
+/* Admin Tables */
+.table-admin {
+  font-size: 0.9rem;
+}
+
+.table-admin th {
+  background-color: #f8f9fa;
+  color: var(--dark-color);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+/* Formulaires admin */
+.admin-form .form-group {
+  margin-bottom: var(--space-md);
+}
+
+.admin-form label {
+  font-weight: 500;
+  margin-bottom: var(--space-xs);
+  display: block;
+}

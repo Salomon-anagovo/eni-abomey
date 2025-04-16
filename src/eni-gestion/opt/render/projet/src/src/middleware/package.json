@@ -1,0 +1,81 @@
+{
+  "name": "eni-gestion",
+  "version": "1.0.0",
+  "description": "Système intégré de gestion pour le Centre de Formation des Instituteurs (ENI Abomey)",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "NODE_ENV=production node app.js",
+    "dev": "NODE_ENV=development nodemon app.js",
+    "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "prepare": "husky install",
+    "migrate": "node migrations/migrate.js",
+    "seed": "node seeds/seedDatabase.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "chalk": "^5.3.0",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^6.8.1",
+    "helmet": "^7.1.0",
+    "hpp": "^0.2.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.8",
+    "pdfkit": "^0.13.0",
+    "rotating-file-stream": "^3.1.1",
+    "xss-clean": "^0.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "husky": "^8.0.3",
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^9.0.0",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.2.4",
+    "supertest": "^6.3.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/",
+      "/config/"
+    ],
+    "setupFilesAfterEnv": [
+      "./tests/setup.js"
+    ]
+  },
+  "keywords": [
+    "ENI",
+    "Abomey",
+    "gestion",
+    "éducation",
+    "MERN"
+  ],
+  "author": "VotreNom <votre@email.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/votrenom/eni-gestion.git"
+  },
+  "bugs": {
+    "url": "https://github.com/votrenom/eni-gestion/issues"
+  }
+}
