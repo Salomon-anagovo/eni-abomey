@@ -1,0 +1,95 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Gestion des élèves</h1>
+  <a href="/eleves/nouveau" class="btn btn-success">
+    <i class="bi bi-plus-circle"></i> Ajouter
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6">
+        <form class="d-flex">
+          <input class="form-control me-2" type="search" placeholder="Rechercher...">
+          <button class="btn btn-outline-primary" type="submit">
+            <i class="bi bi-search"></i>
+          </button>
+        </form>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex justify-content-end">
+          <div class="dropdown me-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              Filtres
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Tous</a></li>
+              <li><a class="dropdown-item" href="#">Actifs</a></li>
+              <li><a class="dropdown-item" href="#">Diplômés</a></li>
+            </ul>
+          </div>
+          <button class="btn btn-outline-secondary">
+            <i class="bi bi-download"></i> Exporter
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Matricule</th>
+          <th>Nom</th>
+          <th>Promotion</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% eleves.forEach(eleve => { %>
+          <tr>
+            <td><%= eleve.matricule %></td>
+            <td>
+              <a href="/eleves/<%= eleve._id %>">
+                <%= eleve.nom %>, <%= eleve.prenom %>
+              </a>
+            </td>
+            <td><%= eleve.promotion %></td>
+            <td>
+              <span class="badge bg-<%= 
+                eleve.statut === 'actif' ? 'success' : 
+                eleve.statut === 'diplômé' ? 'info' : 'secondary' 
+              %>">
+                <%= eleve.statut %>
+              </span>
+            </td>
+            <td>
+              <div class="btn-group">
+                <a href="/eleves/<%= eleve._id %>/notes" class="btn btn-sm btn-outline-primary">
+                  Notes
+                </a>
+                <a href="/eleves/<%= eleve._id %>/edit" class="btn btn-sm btn-outline-secondary">
+                  Modifier
+                </a>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-footer">
+    <nav>
+      <ul class="pagination justify-content-center">
+        <% for(let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
+</div>

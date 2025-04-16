@@ -1,0 +1,181 @@
+<%- include('../layouts/base', { title: 'Saisie des notes' }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-pencil-square"></i> Saisie des notes
+    </h2>
+    <div>
+        <a href="/notes" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Paramètres</h5>
+            </div>
+            <div class="card-body">
+                <form id="saisieForm" method="POST" action="/notes/saisie">
+                    <div class="mb-3">
+                        <label for="classe" class="form-label">Classe</label>
+                        <select class="form-select" id="classe" name="classe" required>
+                            <option value="">Sélectionner une classe</option>
+                            <% classes.forEach(classe => { %>
+                                <option value="<%= classe %>" <%= selectedClasse === classe ? 'selected' : '' %>>
+                                    <%= classe %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="matiere" class="form-label">Matière</label>
+                        <select class="form-select" id="matiere" name="matiere" required>
+                            <option value="">Sélectionner une matière</option>
+                            <% matieres.forEach(matiere => { %>
+                                <option value="<%= matiere %>" <%= selectedMatiere === matiere ? 'selected' : '' %>>
+                                    <%= matiere %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type d'évaluation</label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="">Sélectionner un type</option>
+                            <option value="Devoir">Devoir</option>
+                            <option value="Interrogation">Interrogation</option>
+                            <option value="Examen">Examen</option>
+                            <option value="Projet">Projet</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" 
+                               value="<%= new Date().toISOString().split('T')[0] %>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="coefficient" class="form-label">Coefficient</label>
+                        <input type="number" min="1" max="10" class="form-control" 
+                               id="coefficient" name="coefficient" value="1" required>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Valider les paramètres
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <% if (eleves && eleves.length > 0) { %>
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        Saisie pour <%= selectedMatiere %> - <%= selectedClasse %>
+                    </h5>
+                    <span class="badge bg-light text-dark">
+                        <%= eleves.length %> élèves
+                    </span>
+                </div>
+                <div class="card-body">
+                    <form id="notesForm" method="POST" action="/notes">
+                        <input type="hidden" name="classe" value="<%= selectedClasse %>">
+                        <input type="hidden" name="matiere" value="<%= selectedMatiere %>">
+                        <input type="hidden" name="type" value="<%= selectedType %>">
+                        <input type="hidden" name="date" value="<%= selectedDate %>">
+                        <input type="hidden" name="coefficient" value="<%= coefficient %>">
+
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Élève</th>
+                                        <th width="120">Note /20</th>
+                                        <th width="200">Commentaire</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% eleves.forEach(eleve => { %>
+                                        <tr>
+                                            <td>
+                                                <%= eleve.prenom %> <%= eleve.nom %>
+                                                <input type="hidden" name="eleves[]" value="<%= eleve.id %>">
+                                            </td>
+                                            <td>
+                                                <input type="number" min="0" max="20" step="0.25" 
+                                                       class="form-control note-input" 
+                                                       name="notes[]" required>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" 
+                                                       name="commentaires[]" placeholder="Optionnel">
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Enregistrer toutes les notes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        <% } else if (selectedClasse && selectedMatiere) { %>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Aucun élève trouvé pour cette classe et matière.
+            </div>
+        <% } else { %>
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-journal-text text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Sélectionnez une classe et une matière</h5>
+                    <p class="text-muted">Les élèves apparaîtront ici pour la saisie des notes</p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation des notes
+    const noteInputs = document.querySelectorAll('.note-input');
+    noteInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const value = parseFloat(this.value);
+            if (value < 0) this.value = 0;
+            if (value > 20) this.value = 20;
+        });
+    });
+
+    // Calcul de la moyenne en temps réel
+    const notesForm = document.getElementById('notesForm');
+    if (notesForm) {
+        let total = 0;
+        let count = 0;
+        
+        noteInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value) {
+                    total += parseFloat(this.value);
+                    count++;
+                }
+            });
+        });
+    }
+});
+</script>
