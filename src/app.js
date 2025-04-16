@@ -96,10 +96,10 @@ app.use((req, res, next) => {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware pour fichiers statiques
+// Middleware pour fichiers statiques - CORRECTION ICI
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0'
-});
+})); // Parenthèse manquante ajoutée
 
 // Body parser
 app.use(express.json());
