@@ -1,0 +1,51 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "auth": {
+    "login": "Connexion",
+    "email": "Email",
+    "password": "Mot de passe"
+  },
+  "roles": {
+    "admin": "Administrateur",
+    "teacher": "Formateur",
+    "student": "Élève"
+  }
+  
+}
+
+{
+    "emails": {
+      "welcome": {
+        "title": "Bienvenue à ENI Abomey",
+        "greeting": "Bonjour {name},",
+        "message": "Merci de vous être inscrit sur notre plateforme de gestion académique.",
+        "instructions": "Veuillez cliquer sur le bouton ci-dessous pour activer votre compte :",
+        "activate_button": "Activer mon compte",
+        "alternative": "Ou copiez ce lien dans votre navigateur :"
+      },
+      "reset_password": {
+        "title": "Réinitialisation de mot de passe",
+        "heading": "Réinitialisation demandée",
+        "request_message": "Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.",
+        "button": "Réinitialiser mon mot de passe",
+        "link_expire": "Ce lien expirera dans {hours} heures.",
+        "code_instructions": "Entrez ce code dans l'application pour réinitialiser votre mot de passe.",
+        "security_warning": "Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email."
+      },
+      "notification": {
+        "header": "Nouvelle notification",
+        "view_action": "Voir les détails",
+        "footer_text": "Ceci est une notification automatique, merci de ne pas y répondre.",
+        "settings_link": "Modifier mes préférences de notification"
+      },
+      "footer": {
+        "copyright": "© {year} ENI Abomey - Tous droits réservés",
+        "contact": "Contactez-nous",
+        "privacy": "Politique de confidentialité"
+      }
+    }
+  }

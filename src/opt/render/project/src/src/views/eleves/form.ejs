@@ -1,0 +1,63 @@
+<%- include('../layouts/base', { title: eleve ? 'Modifier élève' : 'Nouvel élève' }) %>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <%= eleve ? 'Modifier élève' : 'Ajouter un nouvel élève' %>
+                </h4>
+            </div>
+            <div class="card-body">
+                <form action="<%= eleve ? `/eleves/${eleve.id}?_method=PUT` : '/eleves' %>" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nom" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="nom" name="nom" value="<%= eleve ? eleve.nom : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="prenom" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="prenom" name="prenom" value="<%= eleve ? eleve.prenom : '' %>" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="<%= eleve ? eleve.email : '' %>" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="classe" class="form-label">Classe</label>
+                            <select class="form-select" id="classe" name="classe" required>
+                                <option value="">Sélectionner...</option>
+                                <% ['6ème', '5ème', '4ème', '3ème', '2nde', '1ère', 'Terminale'].forEach(classe => { %>
+                                    <option value="<%= classe %>" <%= eleve && eleve.classe === classe ? 'selected' : '' %>>
+                                        <%= classe %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="dateNaissance" class="form-label">Date de naissance</label>
+                            <input type="date" class="form-control" id="dateNaissance" name="dateNaissance" 
+                                   value="<%= eleve && eleve.dateNaissance ? eleve.dateNaissance.toISOString().split('T')[0] : '' %>" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="adresse" class="form-label">Adresse</label>
+                        <textarea class="form-control" id="adresse" name="adresse" rows="2"><%= eleve ? eleve.adresse : '' %></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="/eleves" class="btn btn-secondary me-md-2">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <%= eleve ? 'Mettre à jour' : 'Enregistrer' %>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
