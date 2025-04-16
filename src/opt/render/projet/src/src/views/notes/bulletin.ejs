@@ -1,0 +1,258 @@
+<%- include('../layouts/base', { title: `Bulletin - ${eleve.prenom} ${eleve.nom}` }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>
+            <i class="bi bi-journal-bookmark"></i> Bulletin scolaire
+        </h2>
+        <h3 class="h4 text-muted">
+            <%= eleve.prenom %> <%= eleve.nom %> - <%= eleve.classe %>
+        </h3>
+    </div>
+    <div>
+        <a href="/eleves/<%= eleve.id %>/notes" class="btn btn-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Imprimer
+        </button>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4 print-header">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h4>Établissement Scolaire Excellence</h4>
+                <p class="mb-0">123 Rue de l'Éducation, 75000 Paris</p>
+                <p class="mb-0">Tél: 01 23 45 67 89 - Email: contact@excellence.edu</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <p class="mb-0">Année scolaire: <%= anneeScolaire %></p>
+                <p class="mb-0">Période: <%= periode %></p>
+                <p class="mb-0">Date d'édition: <%= new Date().toLocaleDateString('fr-FR') %></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">Informations de l'élève</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2 text-center">
+                <img src="<%= eleve.photo || '/images/avatar-default.png' %>" 
+                     alt="Photo" class="img-thumbnail rounded mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+            </div>
+            <div class="col-md-5">
+                <p><strong>Nom:</strong> <%= eleve.nom %></p>
+                <p><strong>Prénom:</strong> <%= eleve.prenom %></p>
+                <p><strong>Date de naissance:</strong> <%= new Date(eleve.dateNaissance).toLocaleDateString('fr-FR') %></p>
+            </div>
+            <div class="col-md-5">
+                <p><strong>Classe:</strong> <%= eleve.classe %></p>
+                <p><strong>Professeur principal:</strong> <%= professeurPrincipal %></p>
+                <p><strong>Nombre d'absences:</strong> <%= absences %> (<%= retards %> retards)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Résultats scolaires</h5>
+        <div>
+            <span class="badge bg-light text-dark fs-6">
+                Moyenne générale: <strong><%= moyenneGenerale.toFixed(2) %>/20</strong>
+            </span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Matière</th>
+                        <th width="100" class="text-center">Moyenne</th>
+                        <th width="100" class="text-center">Coeff.</th>
+                        <th width="100" class="text-center">Moy. x Coeff</th>
+                        <th>Appréciation</th>
+                        <th width="100" class="text-center">Rang</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% matieres.forEach(matiere => { %>
+                        <tr>
+                            <td>
+                                <strong><%= matiere.nom %></strong>
+                                <div class="text-muted small"><%= matiere.professeur %></div>
+                            </td>
+                            <td class="text-center <%= matiere.moyenne >= 10 ? 'text-success' : 'text-danger' %>">
+                                <strong><%= matiere.moyenne.toFixed(2) %></strong>
+                            </td>
+                            <td class="text-center"><%= matiere.coefficient %></td>
+                            <td class="text-center"><%= (matiere.moyenne * matiere.coefficient).toFixed(2) %></td>
+                            <td><%= matiere.appreciation %></td>
+                            <td class="text-center"><%= matiere.rang %>/<%= effectifClasse %></td>
+                        </tr>
+                    <% }); %>
+                    <tr class="table-active">
+                        <td colspan="3"><strong>TOTAL</strong></td>
+                        <td class="text-center"><strong><%= totalPoints.toFixed(2) %></strong></td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Détail des notes</h5>
+            </div>
+            <div class="card-body">
+                <% matieres.forEach(matiere => { %>
+                    <div class="mb-4">
+                        <h6 class="d-flex justify-content-between align-items-center">
+                            <span><%= matiere.nom %></span>
+                            <span class="badge bg-<%= matiere.moyenne >= 10 ? 'success' : 'danger' %>">
+                                <%= matiere.moyenne.toFixed(2) %>/20
+                            </span>
+                        </h6>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th width="100">Date</th>
+                                        <th>Type</th>
+                                        <th width="80" class="text-end">Note</th>
+                                        <th width="80" class="text-end">Coeff.</th>
+                                        <th>Commentaire</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% matiere.notes.forEach(note => { %>
+                                        <tr>
+                                            <td><%= new Date(note.date).toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit'}) %></td>
+                                            <td><%= note.type %></td>
+                                            <td class="text-end <%= note.note >= 10 ? 'text-success' : 'text-danger' %>">
+                                                <strong><%= note.note %></strong>/20
+                                            </td>
+                                            <td class="text-end"><%= note.coefficient %></td>
+                                            <td><%= note.commentaire || '-' %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Évolution et appréciations</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6>Graphique d'évolution</h6>
+                    <canvas id="evolutionChart" height="200"></canvas>
+                </div>
+
+                <div class="mb-4">
+                    <h6>Appréciation générale</h6>
+                    <div class="border p-3 bg-light">
+                        <%= appreciationGenerale %>
+                    </div>
+                </div>
+
+                <div>
+                    <h6>Signature</h6>
+                    <div class="mt-4 pt-4 border-top">
+                        <div class="row">
+                            <div class="col-6 text-center">
+                                <p>Le professeur principal</p>
+                                <div class="signature-placeholder"></div>
+                                <p><%= professeurPrincipal %></p>
+                            </div>
+                            <div class="col-6 text-center">
+                                <p>Le directeur</p>
+                                <div class="signature-placeholder"></div>
+                                <p>M. Dupont</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 text-center text-muted small print-footer">
+    Document généré électroniquement - valable sans signature
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Graphique d'évolution
+    const ctx = document.getElementById('evolutionChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <%= JSON.stringify(moyennesPeriodes.map(p => p.periode)) %>,
+            datasets: [{
+                label: 'Moyenne générale',
+                data: <%= JSON.stringify(moyennesPeriodes.map(p => p.moyenne)) %>,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 0,
+                    max: 20
+                }
+            }
+        }
+    });
+
+    // Masquer les éléments en mode impression
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @media print {
+            .btn, .print-header, .print-footer {
+                display: none !important;
+            }
+            body {
+                padding: 20px;
+                font-size: 12pt;
+            }
+            .card {
+                border: none;
+                box-shadow: none;
+            }
+            .signature-placeholder {
+                height: 50px;
+                border-bottom: 1px solid #000;
+                margin-bottom: 5px;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
