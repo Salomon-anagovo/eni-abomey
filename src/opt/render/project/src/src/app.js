@@ -1,162 +1,138 @@
 require('dotenv').config();
 const express = require('express');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const mongoose = require('mongoose');
-const cors = require('cors');
 const path = require('path');
-const cookieParser = require('cookie-parser');
-const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const hpp = require('hpp');
-const xss = require('xss-clean');
-const compression = require('compression');
-const morgan = require('morgan');
-const fs = require('fs');
-const rfs = require('rotating-file-stream');
-const chalk = require('chalk');
-
-// Import des middlewares personnalisés
-const errorHandler = require('./middleware/errorHandler');
+const passport = require('passport');
+const flash = require('connect-flash');
+const csrf = require('csurf');
 const { connectDB } = require('./config/db');
+const errorHandler = require('./middleware/errorHandler');
 
 // Initialisation de l'application
 const app = express();
 
-// =============================================
-// 1. CONFIGURATION DE BASE & MIDDLEWARES GÉNÉRAUX
-// =============================================
+// Configuration MongoDB (version sécurisée)
+const mongoUri = process.env.MONGODB_URI || "mongodb+srv://eni_user:Barack122021@cluster0.gbiilyl.mongodb.net/EleveInstituteur?retryWrites=true&w=majority";
 
-// 🔒 Sécurité HTTP headers (Helmet)
-app.use(helmet());
-
-// 🔄 Compression des réponses
-app.use(compression());
-
-// 📝 Logger des requêtes (morgan)
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-} else {
-  // Création d'un système de logs rotatifs en production
-  const logDirectory = path.join(__dirname, 'logs');
-  fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
-  const accessLogStream = rfs.createStream('access.log', {
-    interval: '1d',
-    path: logDirectory
-  });
-  app.use(morgan('combined', { stream: accessLogStream }));
-}
-
-// 🛡️ Protection contre les attaques XSS
-app.use(xss());
-
-// ⏱️ Limiteur de requêtes (Rate Limiting)
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // Limite différente en dev/prod
-  message: 'Trop de requêtes depuis cette IP, veuillez réessayer plus tard.'
-});
-app.use('/api', limiter);
-
-// 📦 Body Parser
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// 🧹 Nettoyage des données contre les injections NoSQL
-app.use(mongoSanitize());
-
-// 🚫 Protection contre la pollution des paramètres HTTP
-app.use(hpp());
-
-// 🍪 Gestion des cookies
-app.use(cookieParser());
-
-// 🌍 Configuration CORS
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN.split(','),
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
-
-// =============================================
-// 2. CONNEXION À LA BASE DE DONNÉES
-// =============================================
-
-// 🗃️ Connexion MongoDB
-connectDB().catch(err => {
-  console.error(chalk.red('❌ Échec critique de la connexion MongoDB:'), err);
+// Connexion à MongoDB avec gestion améliorée
+mongoose.connect(mongoUri, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 30000,
+  retryWrites: true,
+  retryReads: true,
+  w: 'majority'
+})
+.then(() => console.log('✅ Connecté à MongoDB'))
+.catch(err => {
+  console.error('❌ Erreur MongoDB:', err);
   process.exit(1);
 });
 
-// =============================================
-// 3. ROUTES DE L'APPLICATION
-// =============================================
+// Middleware de sécurité
+app.use(helmet());
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net"],
+    styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "fonts.googleapis.com"],
+    imgSrc: ["'self'", "data:", "cdn.jsdelivr.net"],
+    fontSrc: ["'self'", "fonts.gstatic.com", "cdn.jsdelivr.net"],
+    connectSrc: ["'self'"]
+  }
+}));
 
-// 📁 Routes statiques
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// Limitation du taux de requêtes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limite chaque IP à 100 requêtes par fenêtre
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
 
-// 🔐 Routes API
-app.use('/api/v1/auth', require('./routes/auth'));
-app.use('/api/v1/eleves', require('./routes/eleves'));
-app.use('/api/v1/formateurs', require('./routes/formateurs'));
-app.use('/api/v1/personnel', require('./routes/personnel'));
-app.use('/api/v1/notes', require('./routes/notes'));
-app.use('/api/v1/bibliotheque', require('./routes/bibliotheque'));
-app.use('/api/v1/paiements', require('./routes/paiements'));
-app.use('/api/v1/archives', require('./routes/archives'));
-app.use('/api/v1/stages', require('./routes/stages'));
-app.use('/api/v1/emploi-du-temps', require('./routes/emploiDuTemps'));
-app.use('/api/v1/admin', require('./routes/admin'));
-app.use(errorHandler);
+// Configuration des sessions avec stockage MongoDB
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'votre_secret_tres_complexe',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: mongoUri }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 1 jour
+  }
+}));
 
-// =============================================
-// 4. GESTION DES ERREURS
-// =============================================
+// Initialisation de Passport (authentification)
+require('./config/passport')(passport);
+app.use(passport.initialize());
+app.use(passport.session());
 
-// ❌ Route non trouvée (404)
-app.all('*', (req, res, next) => {
-  res.status(404).json({
-    success: false,
-    message: `Route non trouvée: ${req.originalUrl}`
+// Messages flash
+app.use(flash());
+
+// Protection CSRF
+app.use(csrf());
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+// Middleware pour variables globales
+app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
+  res.locals.currentPath = req.path;
+  next();
+});
+
+// Configuration des vues
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Middleware pour fichiers statiques
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0'
+});
+
+// Body parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes principales
+app.use('/', require('./routes/index'));
+app.use('/auth', require('./routes/auth'));
+app.use('/eleves', require('./routes/eleves'));
+app.use('/formateurs', require('./routes/formateurs'));
+app.use('/admin', require('./routes/admin'));
+
+// Gestion des erreurs 404
+app.use((req, res, next) => {
+  res.status(404).render('error/404', {
+    title: 'Page non trouvée',
+    layout: 'layouts/base'
   });
 });
 
-// 🚨 Middleware global de gestion des erreurs
+// Gestionnaire d'erreurs global
 app.use(errorHandler);
 
-// =============================================
-// 5. DÉMARRAGE DU SERVEUR
-// =============================================
-
-const PORT = process.env.PORT || 5000;
-
+// Démarrage du serveur
+const PORT = process.env.PORT || 10000;
 const server = app.listen(PORT, () => {
-  console.log(chalk.green.bold(`
-  ============================================
-   🚀 Serveur ENI-Gestion démarré sur le port ${PORT}
-   Mode: ${process.env.NODE_ENV || 'development'}
-   URL: http://localhost:${PORT}
-  ============================================
-  `));
+  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });
 
-// =============================================
-// 6. GESTION DES ÉVÉNEMENTS PROCESS
-// =============================================
-
-// 🛑 Gestion des erreurs non catchées
+// Gestion des erreurs non capturées
 process.on('unhandledRejection', (err) => {
-  console.error(chalk.red('❌ Unhandled Rejection:'), err);
+  console.error('Erreur non capturée:', err);
   server.close(() => process.exit(1));
-});
-
-// 🛑 Gestion des signaux d'arrêt
-process.on('SIGTERM', () => {
-  console.log(chalk.yellow('🛑 SIGTERM reçu. Arrêt gracieux du serveur'));
-  server.close(() => {
-    console.log(chalk.green('✅ Process terminé proprement'));
-    process.exit(0);
-  });
 });
 
 module.exports = app;
