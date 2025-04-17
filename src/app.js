@@ -9,16 +9,13 @@ const rateLimit = require('express-rate-limit');
 const passport = require('passport');
 const flash = require('connect-flash');
 const csrf = require('csurf');
-const { connectDB } = require('./config/db');
+const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
-// Initialisation de l'application
 const app = express();
 
-// Configuration MongoDB (version sécurisée)
 const mongoUri = process.env.MONGODB_URI || "mongodb+srv://eni_user:Barack122021@cluster0.gbiilyl.mongodb.net/EleveInstituteur?retryWrites=true&w=majority";
 
-// Connexion à MongoDB avec gestion améliorée
 mongoose.connect(mongoUri, {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
@@ -33,7 +30,6 @@ mongoose.connect(mongoUri, {
   process.exit(1);
 });
 
-// Middleware de sécurité
 app.use(helmet());
 app.use(helmet.contentSecurityPolicy({
   directives: {
@@ -46,16 +42,14 @@ app.use(helmet.contentSecurityPolicy({
   }
 }));
 
-// Limitation du taux de requêtes
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limite chaque IP à 100 requêtes par fenêtre
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use(limiter);
 
-// Configuration des sessions avec stockage MongoDB
 app.use(session({
   secret: process.env.SESSION_SECRET || 'votre_secret_tres_complexe',
   resave: false,
@@ -64,26 +58,21 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 1 jour
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
-// Initialisation de Passport (authentification)
 require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Messages flash
 app.use(flash());
-
-// Protection CSRF
 app.use(csrf());
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
   next();
 });
 
-// Middleware pour variables globales
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
   res.locals.success = req.flash('success');
@@ -92,27 +81,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configuration des vues
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware pour fichiers statiques - CORRECTION ICI
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0'
-})); // Parenthèse manquante ajoutée
+}));
 
-// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes principales
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/eleves', require('./routes/eleves'));
 app.use('/formateurs', require('./routes/formateurs'));
 app.use('/admin', require('./routes/admin'));
 
-// Gestion des erreurs 404
 app.use((req, res, next) => {
   res.status(404).render('error/404', {
     title: 'Page non trouvée',
@@ -120,16 +104,13 @@ app.use((req, res, next) => {
   });
 });
 
-// Gestionnaire d'erreurs global
 app.use(errorHandler);
 
-// Démarrage du serveur
 const PORT = process.env.PORT || 10000;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });
 
-// Gestion des erreurs non capturées
 process.on('unhandledRejection', (err) => {
   console.error('Erreur non capturée:', err);
   server.close(() => process.exit(1));
