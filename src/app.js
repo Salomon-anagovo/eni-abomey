@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('passport');
+const confirmationRoute = require('./routes/confirmation');
 
 // Initialisation
 const app = express();
@@ -30,6 +31,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/confirmation', confirmationRoute);
 
 // Sessions
 app.use(session({
