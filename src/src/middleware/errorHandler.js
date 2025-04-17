@@ -1,34 +1,32 @@
-const ErrorResponse = require('../utils/ErrorResponse');
+const { ErrorResponse } = require('../utils/ErrorResponse');
 
 const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.message = err.message;
+  // Copie de l'erreur avec message
+  const error = { ...err, message: err.message };
 
-  // Log pour le développement
-  console.error(err.stack.red);
-
-  // Erreurs Mongoose
-  if (err.name === 'CastError') {
-    const message = `Ressource introuvable avec l'ID ${err.value}`;
-    error = new ErrorResponse(message, 404);
+  // Log en développement
+  if (process.env.NODE_ENV === 'development') {
+    console.error('[ErrorHandler]', {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+      code: err.code
+    });
   }
 
-  // Duplication de clé Mongoose
-  if (err.code === 11000) {
-    const message = 'Valeur dupliquée dans la base de données';
-    error = new ErrorResponse(message, 400);
-  }
+  // Transformations des erreurs
+  if (err.name === 'CastError') error = ErrorResponse.handleCastError(err);
+  if (err.code === 11000) error = ErrorResponse.handleDuplicateFieldError(err);
+  if (err.name === 'ValidationError') error = ErrorResponse.handleValidationError(err);
 
-  // Validation Mongoose
-  if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message);
-    error = new ErrorResponse(message, 400);
-  }
-
-  res.status(error.statusCode || 500).json({
-    success: false,
-    error: error.message || 'Erreur serveur'
-  });
+  // Réponse finale (avec fallback)
+  res.status(error.statusCode || 500).json(
+    error.toJSON?.() || {
+      success: false,
+      error: error.message || 'Erreur serveur',
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    }
+  );
 };
 
 module.exports = errorHandler;
