@@ -1,6 +1,6 @@
 // Solution 1: Version CommonJS garantie
 const path = require('path');
-const { ErrorResponse } = require(path.join(__dirname, 'opt/render/project/src/src/utils/ErrorResponse'));
+const { ErrorResponse } = require(path.join(__dirname, '../../utils/ErrorResponse'));
 
 const errorHandler = (err, req, res, next) => {
   // Log complet en développement
