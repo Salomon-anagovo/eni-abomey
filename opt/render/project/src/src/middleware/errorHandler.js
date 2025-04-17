@@ -1,32 +1,31 @@
-const { ErrorResponse } = require('../utils/ErrorResponse');
+// Solution 1: Version CommonJS garantie
+const path = require('path');
+const { ErrorResponse } = require(path.join(__dirname, '../../utils/ErrorResponse'));
 
 const errorHandler = (err, req, res, next) => {
-  // Copie de l'erreur avec message
-  const error = { ...err, message: err.message };
+  // Log complet en développement
+  console.error('[ErrorHandler]', {
+    message: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    type: err.name,
+    statusCode: err.statusCode
+  });
 
-  // Log en développement
-  if (process.env.NODE_ENV === 'development') {
-    console.error('[ErrorHandler]', {
-      message: err.message,
-      stack: err.stack,
-      name: err.name,
-      code: err.code
-    });
-  }
+  // Gestion des erreurs Mongoose
+  const error = err.name === 'CastError' ? ErrorResponse.handleCastError(err)
+    : err.code === 11000 ? ErrorResponse.handleDuplicateFieldError(err)
+    : err.name === 'ValidationError' ? ErrorResponse.handleValidationError(err)
+    : err;
 
-  // Transformations des erreurs
-  if (err.name === 'CastError') error = ErrorResponse.handleCastError(err);
-  if (err.code === 11000) error = ErrorResponse.handleDuplicateFieldError(err);
-  if (err.name === 'ValidationError') error = ErrorResponse.handleValidationError(err);
-
-  // Réponse finale (avec fallback)
-  res.status(error.statusCode || 500).json(
-    error.toJSON?.() || {
-      success: false,
-      error: error.message || 'Erreur serveur',
-      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-    }
-  );
+  // Réponse sécurisée
+  res.status(error.statusCode || 500).json({
+    success: false,
+    error: error.message || 'Erreur serveur',
+    ...(process.env.NODE_ENV === 'development' && {
+      stack: error.stack,
+      details: error.details
+    })
+  });
 };
 
 module.exports = errorHandler;
