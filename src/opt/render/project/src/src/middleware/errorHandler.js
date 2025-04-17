@@ -1,34 +1,27 @@
-const ErrorResponse = require('../utils/ErrorResponse');
+const { ErrorResponse } = require('../utils/ErrorResponse');
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
   // Log pour le développement
-  console.error(err.stack.red);
+  console.error(err.stack);
 
   // Erreurs Mongoose
   if (err.name === 'CastError') {
-    const message = `Ressource introuvable avec l'ID ${err.value}`;
-    error = new ErrorResponse(message, 404);
+    error = ErrorResponse.handleCastError(err);
   }
 
-  // Duplication de clé Mongoose
   if (err.code === 11000) {
-    const message = 'Valeur dupliquée dans la base de données';
-    error = new ErrorResponse(message, 400);
+    error = ErrorResponse.handleDuplicateFieldError(err);
   }
 
-  // Validation Mongoose
   if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message);
-    error = new ErrorResponse(message, 400);
+    error = ErrorResponse.handleValidationError(err);
   }
 
-  res.status(error.statusCode || 500).json({
-    success: false,
-    error: error.message || 'Erreur serveur'
-  });
+  // Envoi de la réponse d'erreur
+  res.status(error.statusCode || 500).json(error.toJSON());
 };
 
 module.exports = errorHandler;
