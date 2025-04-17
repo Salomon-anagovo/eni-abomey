@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Inscription publique</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    form {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Formulaire d'inscription publique</h1>
+  <form action="/inscription" method="POST">
+    <label for="nom">Nom</label>
+    <input type="text" name="nom" id="nom" required>
+
+    <label for="prenom">Prénom</label>
+    <input type="text" name="prenom" id="prenom" required>
+
+    <label for="email">Email</label>
+    <input type="email" name="email" id="email" required>
+
+    <label for="telephone">Téléphone</label>
+    <input type="text" name="telephone" id="telephone" required>
+
+    <label for="pays">Pays</label>
+    <input type="text" name="pays" id="pays" required>
+
+    <label for="role">Rôle</label>
+    <select name="role" id="role" required>
+      <option value="eleve">Élève</option>
+      <option value="formateur">Formateur</option>
+      <option value="admin">Admin</option>
+      <option value="autre">Autre</option>
+    </select>
+
+    <button type="submit">S'inscrire</button>
+  </form>
+</body>
+</html>
