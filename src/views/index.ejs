@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #003366;
+      color: #fff;
+      padding: 1rem 2rem;
+    }
+    nav a {
+      color: #fff;
+      margin-right: 1rem;
+      text-decoration: none;
+    }
+    main {
+      padding: 2rem;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background-color: #eee;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ENI Abomey</h1>
+    <nav>
+      <% navLinks.forEach(link => { %>
+        <% if (!link.auth || (user && (!link.roles || link.roles.includes(user.role)))) { %>
+          <a href="<%= link.path %>"><%= link.icon %> <%= link.title %></a>
+        <% } %>
+      <% }) %>
+
+      <% if (user) { %>
+        <span style="margin-left: 2rem;">👋 Bonjour, <%= user.nom || user.username %></span>
+        <a href="/logout" style="margin-left: 1rem;">🔓 Déconnexion</a>
+      <% } else { %>
+        <a href="/login" style="margin-left: 2rem;">🔐 Connexion</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Bienvenue sur la plateforme de gestion pédagogique de l’ENI Abomey</h2>
+    <p>Utilisez le menu ci-dessus pour naviguer dans l'application.</p>
+    <p>Année courante : <strong><%= currentYear %></strong></p>
+  </main>
+
+  <footer>
+    &copy; <%= currentYear %> ENI Abomey. Tous droits réservés.
+  </footer>
+</body>
+</html>
