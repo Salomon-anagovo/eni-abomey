@@ -23,12 +23,20 @@
     }
     main {
       padding: 2rem;
+      text-align: center;
     }
     footer {
       text-align: center;
       padding: 1rem;
       background-color: #eee;
       margin-top: 3rem;
+    }
+    img.hero {
+      max-width: 100%;
+      height: auto;
+      margin-top: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
   </style>
 </head>
@@ -41,6 +49,8 @@
           <a href="<%= link.path %>"><%= link.icon %> <%= link.title %></a>
         <% } %>
       <% }) %>
+      <a href="/inscription">📝 Inscription</a>
+      <a href="/blog">📰 Blog</a>
 
       <% if (user) { %>
         <span style="margin-left: 2rem;">👋 Bonjour, <%= user.nom || user.username %></span>
@@ -55,6 +65,9 @@
     <h2>Bienvenue sur la plateforme de gestion pédagogique de l’ENI Abomey</h2>
     <p>Utilisez le menu ci-dessus pour naviguer dans l'application.</p>
     <p>Année courante : <strong><%= currentYear %></strong></p>
+
+    <!-- Image d'accueil -->
+    <img class="hero" src="/images/accueil.jpg" alt="Bienvenue à l'ENI Abomey">
   </main>
 
   <footer>
