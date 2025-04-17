@@ -10,6 +10,10 @@ const passport = require('passport');
 // Initialisation
 const app = express();
 
+// Configuration du moteur de vue EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // Connexion MongoDB (avec gestion d'erreur améliorée)
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/eni-abomey', {
   serverSelectionTimeoutMS: 5000,
