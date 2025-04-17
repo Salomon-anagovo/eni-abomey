@@ -5,73 +5,102 @@
   <title><%= title %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f8f9fa;
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
+
+    body, html {
+      height: 100%;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    .background {
+      background: url('/images/accueil.jpg') no-repeat center center/cover;
+      height: 100vh;
+      position: relative;
+      color: white;
+    }
+
+    .overlay {
+      background: rgba(0, 0, 0, 0.6);
+      height: 100%;
+      width: 100%;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
     header {
-      background-color: #003366;
-      color: #fff;
+      background: rgba(0, 0, 0, 0.7);
       padding: 1rem 2rem;
     }
+
     nav a {
       color: #fff;
       margin-right: 1rem;
       text-decoration: none;
+      font-weight: bold;
     }
+
     main {
-      padding: 2rem;
       text-align: center;
+      margin-top: auto;
+      margin-bottom: auto;
     }
+
+    main h2 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    main p {
+      font-size: 1.2rem;
+    }
+
     footer {
       text-align: center;
       padding: 1rem;
-      background-color: #eee;
-      margin-top: 3rem;
-    }
-    img.hero {
-      max-width: 100%;
-      height: auto;
-      margin-top: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background-color: rgba(0, 0, 0, 0.6);
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>ENI Abomey</h1>
-    <nav>
-      <% navLinks.forEach(link => { %>
-        <% if (!link.auth || (user && (!link.roles || link.roles.includes(user.role)))) { %>
-          <a href="<%= link.path %>"><%= link.icon %> <%= link.title %></a>
-        <% } %>
-      <% }) %>
-      <a href="/inscription">📝 Inscription</a>
-      <a href="/blog">📰 Blog</a>
+  <div class="background">
+    <div class="overlay">
+      <header>
+        <h1>ENI Abomey</h1>
+        <nav>
+          <% navLinks.forEach(link => { %>
+            <% if (!link.auth || (user && (!link.roles || link.roles.includes(user.role)))) { %>
+              <a href="<%= link.path %>"><%= link.icon %> <%= link.title %></a>
+            <% } %>
+          <% }) %>
+          <a href="/inscription">📝 Inscription</a>
+          <a href="/blog">📰 Blog</a>
+          <a href="/bibliotheque">📚 Bibliothèque</a>
 
-      <% if (user) { %>
-        <span style="margin-left: 2rem;">👋 Bonjour, <%= user.nom || user.username %></span>
-        <a href="/logout" style="margin-left: 1rem;">🔓 Déconnexion</a>
-      <% } else { %>
-        <a href="/login" style="margin-left: 2rem;">🔐 Connexion</a>
-      <% } %>
-    </nav>
-  </header>
+          <% if (user) { %>
+            <span style="margin-left: 2rem;">👋 Bonjour, <%= user.nom || user.username %></span>
+            <a href="/logout" style="margin-left: 1rem;">🔓 Déconnexion</a>
+          <% } else { %>
+            <a href="/login" style="margin-left: 2rem;">🔐 Connexion</a>
+          <% } %>
+        </nav>
+      </header>
 
-  <main>
-    <h2>Bienvenue sur la plateforme de gestion pédagogique de l’ENI Abomey</h2>
-    <p>Utilisez le menu ci-dessus pour naviguer dans l'application.</p>
-    <p>Année courante : <strong><%= currentYear %></strong></p>
+      <main>
+        <h2>Bienvenue sur la plateforme de gestion pédagogique</h2>
+        <p>de l’École Normale des Instituteurs d’Abomey</p>
+      </main>
 
-    <!-- Image d'accueil -->
-    <img class="hero" src="/images/accueil.jpg" alt="Bienvenue à l'ENI Abomey">
-  </main>
-
-  <footer>
-    &copy; <%= currentYear %> ENI Abomey. Tous droits réservés.
-  </footer>
+      <footer>
+        &copy; <%= currentYear %> ENI Abomey. Tous droits réservés.
+      </footer>
+    </div>
+  </div>
 </body>
 </html>
