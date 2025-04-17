@@ -1,64 +1,42 @@
+// src/routes/index.js
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 const User = require('../models/User');
-const { ensureAuthenticated, forwardAuthenticated } = require('../middleware/auth');
 
 // Page d'accueil
-router.get('/', forwardAuthenticated, (req, res) => {
-  res.render('index', {
-    title: 'ENI Abomey - Gestion des élèves',
-    currentYear: new Date().getFullYear()
-  });
+router.get('/', (req, res) => {
+  res.send('Bienvenue sur l’application de gestion ENI Abomey');
 });
 
 // Page de connexion (GET)
-router.get('/login', forwardAuthenticated, (req, res) => {
-  res.render('login', {
-    title: 'Connexion',
-    csrfToken: req.csrfToken(),
-    messages: req.flash()
-  });
+router.get('/login', (req, res) => {
+  res.send('<form method="POST" action="/login">Email: <input name="email" /><br/>Mot de passe: <input name="password" type="password" /><br/><button type="submit">Connexion</button></form>');
 });
 
 // Connexion (POST)
-router.post('/login', [
-  passport.authenticate('local', {
-    failureRedirect: '/login',
-    failureFlash: 'Email ou mot de passe incorrect'
-  }),
-  (req, res) => {
-    // Après connexion réussie
-    req.flash('success', `Bienvenue ${req.user.prenom} !`);
-    res.redirect(req.session.returnTo || '/dashboard');
-    delete req.session.returnTo;
-  }
-]);
+router.post('/login', passport.authenticate('local', {
+  successRedirect: '/dashboard',
+  failureRedirect: '/login',
+}));
 
 // Page de dashboard (protégée)
-router.get('/dashboard', ensureAuthenticated, (req, res) => {
-  res.render('dashboard', {
-    title: 'Tableau de bord',
-    user: req.user,
-    lastLogin: req.user.lastLogin?.toLocaleString() || 'Première connexion'
-  });
+router.get('/dashboard', isAuthenticated, (req, res) => {
+  res.send(`Bienvenue ${req.user.prenom} ! Vous êtes connecté en tant que ${req.user.role}`);
 });
 
 // Déconnexion
-router.get('/logout', (req, res, next) => {
+router.get('/logout', (req, res) => {
   req.logout(err => {
     if (err) return next(err);
-    req.flash('success', 'Vous avez été déconnecté avec succès');
     res.redirect('/');
   });
 });
 
-// Page de réinitialisation de mot de passe
-router.get('/reset-password', (req, res) => {
-  res.render('reset-password', {
-    title: 'Réinitialisation du mot de passe',
-    csrfToken: req.csrfToken()
-  });
-});
+// Middleware pour vérifier l’authentification
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  res.redirect('/login');
+}
 
 module.exports = router;
