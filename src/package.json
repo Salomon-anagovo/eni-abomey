@@ -5,19 +5,15 @@
   "main": "app.js",
   "type": "commonjs",
   "engines": {
-    "node": ">=22.14.0",
-    "npm": ">=10.0.0"
+    "node": "22.14.0"
   },
   "scripts": {
-    "start": "NODE_ENV=production node app.js",
-    "dev": "NODE_ENV=development nodemon app.js",
-    "test": "NODE_ENV=test jest --watchAll",
-    "lint": "eslint .",
-    "security-check": "npm audit --production"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "dependencies": {
-    "connect-flash": "^0.1.1",
     "connect-mongo": "^5.0.0",
+    "connect-flash": "^0.1.1",
     "csurf": "^1.11.0",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
@@ -27,24 +23,9 @@
     "helmet": "^7.0.0",
     "mongoose": "^8.0.3",
     "passport": "^0.7.0",
-    "passport-local": "^1.0.0",
-    "express-mongo-sanitize": "^2.2.0",
-    "hpp": "^0.2.3",
-    "cors": "^2.8.5"
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2",
-    "eslint": "^8.56.0",
-    "eslint-config-airbnb-base": "^16.1.0",
-    "eslint-plugin-import": "^2.29.0",
-    "jest": "^29.7.0",
-    "supertest": "^6.3.4"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/tests/"
-    ]
+    "nodemon": "^3.0.2"
   }
 }
