@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Application de gestion des élèves-instituteurs ENI Abomey",
   "main": "app.js",
-  "type": "commonjs",
+  "type": "module",
   "engines": {
     "node": "22.14.0"
   },
