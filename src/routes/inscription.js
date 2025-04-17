@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 const Inscription = require('../models/Inscription');
 
@@ -12,10 +13,10 @@ router.get('/', (req, res) => {
 
 // Traitement du formulaire d’inscription
 router.post('/', async (req, res) => {
-  const { nom, prenom, email, telephone, pays, role } = req.body;
+  const { nom, prenom, email, telephone, pays, role, password } = req.body;
 
   // Vérification simple des champs requis
-  if (!nom || !prenom || !email || !telephone || !pays || !role) {
+  if (!nom || !prenom || !email || !telephone || !pays || !role || !password) {
     req.flash('error', 'Veuillez remplir tous les champs requis.');
     return res.redirect('/inscription');
   }
@@ -28,13 +29,18 @@ router.post('/', async (req, res) => {
       return res.redirect('/inscription');
     }
 
+    // Hasher le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Enregistrer l'utilisateur
     await Inscription.create({
       nom,
       prenom,
       email,
       telephone,
       pays,
-      role
+      role,
+      motDePasse: hashedPassword  // Enregistrer le mot de passe haché
     });
 
     req.flash('success', 'Inscription réussie ! Merci pour votre intérêt.');
