@@ -1,20 +1,12 @@
 const mongoose = require('mongoose');
 const chalk = require('chalk');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+require('dotenv').config();
 
-// Configuration optimisée de la connexion MongoDB
 const connectDB = async () => {
   try {
-    let mongoUri = process.env.MONGO_URI || 
+    let mongoUri = process.env.MONGODB_URI || 
       "mongodb+srv://eni_user:Barack122021@cluster0.gbiilyl.mongodb.net/EleveInstituteur?retryWrites=true&w=majority";
 
-    // Utilisation de MongoDB en mémoire pour les tests
-    if (process.env.NODE_ENV === 'test') {
-      const mongoServer = await MongoMemoryServer.create();
-      mongoUri = mongoServer.getUri();
-    }
-
-    // Options de connexion avancées
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -26,7 +18,6 @@ const connectDB = async () => {
       w: 'majority'
     };
 
-    // Événements de connexion
     mongoose.connection.on('connecting', () => {
       console.log(chalk.yellow('🔄 Connexion à MongoDB en cours...'));
     });
@@ -43,10 +34,8 @@ const connectDB = async () => {
       console.log(chalk.yellow('⚠️  MongoDB déconnecté'));
     });
 
-    // Connexion principale
     await mongoose.connect(mongoUri, options);
 
-    // Mode debug si nécessaire
     if (process.env.MONGO_DEBUG === 'true') {
       mongoose.set('debug', (collectionName, method, query, doc) => {
         console.log(chalk.blue(`MongoDB: ${collectionName}.${method}`, {
@@ -55,19 +44,16 @@ const connectDB = async () => {
         }));
       });
     }
-
   } catch (err) {
     console.error(chalk.red(`❌ Échec de connexion MongoDB: ${err.message}`));
     process.exit(1);
   }
 };
 
-// Masquer les informations sensibles dans les logs
 function getCleanUri(uri) {
   return uri.replace(/\/\/[^@]+@/, '//***:***@');
 }
 
-// Gestion de la déconnexion propre
 async function closeDB() {
   try {
     await mongoose.connection.close();
@@ -77,7 +63,6 @@ async function closeDB() {
   }
 }
 
-// Gestion des signaux d'arrêt
 process.on('SIGINT', async () => {
   await closeDB();
   process.exit(0);
