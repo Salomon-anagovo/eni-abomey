@@ -4,10 +4,7 @@ class ErrorResponse extends Error {
     this.statusCode = statusCode;
     this.details = details;
     this.isOperational = true;
-
     Error.captureStackTrace(this, this.constructor);
-
-    this.logMessage = `[${new Date().toISOString()}] ${this.constructor.name}: ${message} (${statusCode})`;
   }
 
   toJSON() {
@@ -15,7 +12,7 @@ class ErrorResponse extends Error {
       success: false,
       error: this.message,
       statusCode: this.statusCode,
-      ...(process.env.NODE_ENV === 'development' && {
+      ...(process.env.NODE_ENV !== 'production' && {
         stack: this.stack,
         details: this.details
       })
@@ -24,7 +21,7 @@ class ErrorResponse extends Error {
 
   static handleValidationError(err) {
     const messages = Object.values(err.errors).map(val => val.message);
-    return new ErrorResponse(messages.join(', '), 400, {
+    return new this(messages.join(', '), 400, {
       type: 'ValidationError',
       fields: Object.keys(err.errors)
     });
@@ -32,7 +29,7 @@ class ErrorResponse extends Error {
 
   static handleDuplicateFieldError(err) {
     const field = Object.keys(err.keyValue)[0];
-    return new ErrorResponse(`${field} existe déjà`, 400, {
+    return new this(`${field} existe déjà`, 400, {
       type: 'DuplicateField',
       field,
       value: err.keyValue[field]
@@ -40,14 +37,14 @@ class ErrorResponse extends Error {
   }
 
   static handleCastError(err) {
-    return new ErrorResponse(`Ressource introuvable`, 404, {
+    return new this(`ID invalide: ${err.value}`, 400, {
       type: 'InvalidId',
       value: err.value
     });
   }
 }
 
-// Exportation en CommonJS
+// Exportations
 module.exports = {
   ErrorResponse,
   badRequest: (message = 'Requête invalide') => new ErrorResponse(message, 400),
