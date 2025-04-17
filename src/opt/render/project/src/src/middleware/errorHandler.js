@@ -1,27 +1,42 @@
 const { ErrorResponse } = require('../utils/ErrorResponse');
 
 const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.message = err.message;
-
-  // Log pour le développement
-  console.error(err.stack);
-
-  // Erreurs Mongoose
-  if (err.name === 'CastError') {
-    error = ErrorResponse.handleCastError(err);
+  // Log complet en développement
+  if (process.env.NODE_ENV !== 'production') {
+    console.error('[ERROR]', {
+      message: err.message,
+      stack: err.stack,
+      type: err.name,
+      code: err.code
+    });
   }
 
-  if (err.code === 11000) {
-    error = ErrorResponse.handleDuplicateFieldError(err);
+  let error = err;
+
+  // Transformations des erreurs Mongoose
+  switch (true) {
+    case err.name === 'CastError':
+      error = ErrorResponse.handleCastError(err);
+      break;
+    case err.code === 11000:
+      error = ErrorResponse.handleDuplicateFieldError(err);
+      break;
+    case err.name === 'ValidationError':
+      error = ErrorResponse.handleValidationError(err);
+      break;
+    case !error.statusCode:
+      error = new ErrorResponse(err.message, 500);
   }
 
-  if (err.name === 'ValidationError') {
-    error = ErrorResponse.handleValidationError(err);
-  }
-
-  // Envoi de la réponse d'erreur
-  res.status(error.statusCode || 500).json(error.toJSON());
+  // Réponse sécurisée
+  res.status(error.statusCode).json({
+    success: false,
+    error: error.message,
+    ...(process.env.NODE_ENV !== 'production' && {
+      stack: error.stack,
+      details: error.details
+    })
+  });
 };
 
 module.exports = errorHandler;
