@@ -3,16 +3,16 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'ton.email@gmail.com',
-    pass: 'ton_mot_de_passe_app'
+    user: 'salomonanagovo@gmail.com',
+    pass: 'Samlas1990'
   }
 });
 
 const sendConfirmationEmail = (userEmail, token) => {
-  const confirmationLink = `https://ton-domaine.com/confirmation/${token}`;
+  const confirmationLink = `https://https://eni-abomey.onrender.com//confirmation/${token}`;
 
   const mailOptions = {
-    from: '"ENI Abomey" <ton.email@gmail.com>',
+    from: '"ENI Abomey" <salomonanagovo@gmail.com>',
     to: userEmail,
     subject: 'Confirmation de votre inscription',
     html: `
