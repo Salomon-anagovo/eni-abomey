@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = express.Router();
 const User = require('../models/User');
 
+
 // Middleware d'authentification
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) return next();
@@ -65,5 +66,8 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
   });
 });
+
+// Route pour le formulaire d’inscription public
+router.use('/inscription', require('./inscription'));
 
 module.exports = router;
