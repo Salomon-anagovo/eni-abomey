@@ -2,8 +2,8 @@
   "name": "eni-abomey-app",
   "version": "1.0.0",
   "description": "Application de gestion des élèves-instituteurs ENI Abomey",
-  "main": "src/app.js",
-  "type": "commonjs",
+  "main": "app.js",
+  "type": "CommonJS",
   "engines": {
     "node": "22.14.0"
   },
