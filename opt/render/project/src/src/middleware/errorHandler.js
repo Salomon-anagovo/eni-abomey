@@ -1,4 +1,4 @@
-const ErrorResponse = require('../utils/ErrorResponse');
+const { ErrorResponse } = require('../utils/ErrorResponse');
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
@@ -25,6 +25,7 @@ const errorHandler = (err, req, res, next) => {
     error = new ErrorResponse(message, 400);
   }
 
+  // Envoi de la réponse d'erreur
   res.status(error.statusCode || 500).json({
     success: false,
     error: error.message || 'Erreur serveur'
