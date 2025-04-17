@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="/">ENI Abomey</a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <% navLinks.forEach(link => { %>
+          <% if (!link.auth || (link.auth && user)) { %>
+            <% if (!link.roles || (link.roles && user && link.roles.includes(user.role))) { %>
+              <li class="nav-item">
+                <a class="nav-link <%= (currentPath === link.path) ? 'active' : '' %>" href="<%= link.path %>">
+                  <%= link.icon %> <%= link.title %>
+                </a>
+              </li>
+            <% } %>
+          <% } %>
+        <% }) %>
+      </ul>
+
+      <% if (user) { %>
+        <div class="d-flex">
+          <span class="navbar-text me-3">
+            Connecté en tant que <strong><%= user.prenom %></strong>
+          </span>
+          <a href="/logout" class="btn btn-outline-light">Déconnexion</a>
+        </div>
+      <% } else { %>
+        <a href="/login" class="btn btn-outline-light">Connexion</a>
+      <% } %>
+    </div>
+  </div>
+</nav>
