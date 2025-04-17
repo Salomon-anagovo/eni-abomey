@@ -39,6 +39,11 @@
       border: 1px solid #ccc;
     }
 
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+
     button {
       padding: 0.75rem 1.5rem;
       background-color: #007bff;
@@ -49,8 +54,12 @@
       font-weight: bold;
     }
 
+    button.cancel {
+      background-color: #6c757d;
+    }
+
     button:hover {
-      background-color: #0056b3;
+      opacity: 0.9;
     }
   </style>
 </head>
@@ -80,7 +89,13 @@
       <option value="autre">Autre</option>
     </select>
 
-    <button type="submit">S'inscrire</button>
+    <label for="password">Mot de passe</label>
+    <input type="password" name="password" id="password" required>
+
+    <div class="buttons">
+      <button type="submit">S'inscrire</button>
+      <button type="button" class="cancel" onclick="window.location.href='/'">Annuler</button>
+    </div>
   </form>
 </body>
 </html>
