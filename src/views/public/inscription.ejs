@@ -7,169 +7,234 @@
   <link rel="stylesheet" href="/css/style.css" />
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f9f9f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
       padding: 2rem;
+      line-height: 1.6;
     }
-    form {
+    .form-container {
       max-width: 700px;
-      margin: auto;
+      margin: 2rem auto;
       background: white;
-      padding: 2rem;
+      padding: 2.5rem;
       border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
     h1 {
       text-align: center;
       margin-bottom: 1.5rem;
+      color: #2c3e50;
+      font-size: 1.8rem;
     }
     label {
       display: block;
-      margin-top: 1rem;
-      font-weight: bold;
+      margin: 1.2rem 0 0.5rem;
+      font-weight: 600;
+      color: #34495e;
     }
     input, select, textarea {
       width: 100%;
-      padding: 10px;
-      margin-top: .5rem;
-      border: 1px solid #ccc;
+      padding: 12px;
+      margin-top: 0.3rem;
+      border: 1px solid #ddd;
       border-radius: 6px;
+      font-size: 1rem;
+      transition: border 0.3s;
     }
-    .inline {
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+    }
+    .inline-group {
       display: flex;
-      gap: 1rem;
+      gap: 1.2rem;
+      margin-bottom: 1rem;
     }
-    .inline > div {
+    .inline-group > div {
       flex: 1;
     }
-    .error {
-      color: red;
-      margin-bottom: 1rem;
+    .error-message {
+      color: #e74c3c;
+      margin: 1rem 0;
+      padding: 0.8rem;
+      background: #fdecea;
+      border-radius: 6px;
       text-align: center;
+      font-weight: 500;
     }
-    button {
-      margin-top: 1.5rem;
+    .success-message {
+      color: #27ae60;
+      margin: 1rem 0;
+      padding: 0.8rem;
+      background: #e8f5e9;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .btn-submit {
+      margin-top: 2rem;
       width: 100%;
       padding: 1rem;
-      background: #2c3e50;
+      background: #3498db;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 1rem;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      transition: background 0.3s;
     }
-    .cancel-btn {
-      background: #e74c3c;
-      margin-top: 10px;
+    .btn-submit:hover {
+      background: #2980b9;
+    }
+    .btn-cancel {
+      display: block;
       text-align: center;
-      display: inline-block;
+      margin-top: 1rem;
       padding: 1rem;
-      width: 100%;
+      background: #95a5a6;
       color: white;
-      font-weight: bold;
+      font-weight: 600;
       border-radius: 6px;
-      cursor: pointer;
       text-decoration: none;
+      transition: background 0.3s;
+    }
+    .btn-cancel:hover {
+      background: #7f8c8d;
+    }
+    .file-input-info {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+      margin-top: 0.3rem;
+    }
+    .checkbox-container {
+      margin: 1.5rem 0;
+      display: flex;
+      align-items: center;
+    }
+    .checkbox-container input {
+      width: auto;
+      margin-right: 0.5rem;
+    }
+    @media (max-width: 768px) {
+      .inline-group {
+        flex-direction: column;
+        gap: 0;
+      }
+      .form-container {
+        padding: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
-  <form action="/inscription" method="POST" enctype="multipart/form-data">
-    <h1>Formulaire d'inscription</h1>
+  <div class="form-container">
+    <form id="inscriptionForm" action="/inscription" method="POST" enctype="multipart/form-data" novalidate>
+      <h1>Formulaire d'inscription</h1>
 
-    <% if (typeof error !== 'undefined') { %>
-      <p class="error"><%= error %></p>
-    <% } %>
+      <% if (typeof error !== 'undefined') { %>
+        <div class="error-message"><%= error %></div>
+      <% } %>
+      <% if (typeof success !== 'undefined') { %>
+        <div class="success-message"><%= success %></div>
+      <% } %>
 
-    <label for="nom">Nom</label>
-    <input type="text" name="nom" required>
-
-    <label for="prenom">Prénom</label>
-    <input type="text" name="prenom" required>
-
-    <label for="email">Email</label>
-    <input type="email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" title="Entrez une adresse email valide.">
-
-    <div class="inline">
-      <div>
-        <label for="pays">Pays</label>
-        <input type="text" id="pays" name="pays" list="paysList" placeholder="Choisir ou saisir un pays" required>
-        <datalist id="paysList">
-          <option value="Bénin"></option>
-          <option value="France"></option>
-          <option value="Côte d’Ivoire"></option>
-          <option value="Togo"></option>
-          <option value="Sénégal"></option>
-          <option value="Mali"></option>
-          <option value="Niger"></option>
-          <option value="Burkina Faso"></option>
-          <option value="Cameroun"></option>
-          <option value="Canada"></option>
-          <option value="USA"></option>
-          <option value="RDC"></option>
-          <option value="Rwanda"></option>
-          <option value="Algérie"></option>
-          <option value="Maroc"></option>
-          <option value="Tunisie"></option>
-          <option value="Afrique du Sud"></option>
-        </datalist>
+      <div class="inline-group">
+        <div>
+          <label for="nom">Nom*</label>
+          <input type="text" id="nom" name="nom" required 
+                 pattern="[A-Za-zÀ-ÿ\s\-]{2,}" 
+                 title="Minimum 2 caractères alphabétiques">
+        </div>
+        <div>
+          <label for="prenom">Prénom*</label>
+          <input type="text" id="prenom" name="prenom" required
+                 pattern="[A-Za-zÀ-ÿ\s\-]{2,}" 
+                 title="Minimum 2 caractères alphabétiques">
+        </div>
       </div>
-      <div>
-        <label for="indicatif">Indicatif</label>
-        <input type="text" id="indicatif" name="indicatif" placeholder="Indicatif" required>
+
+      <label for="email">Email*</label>
+      <input type="email" id="email" name="email" required
+             pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+             title="Entrez une adresse email valide">
+
+      <div class="inline-group">
+        <div>
+          <label for="pays">Pays*</label>
+          <input type="text" id="pays" name="pays" list="paysList" required>
+          <datalist id="paysList">
+            <option value="Bénin">
+            <option value="France">
+            <!-- Autres options... -->
+          </datalist>
+        </div>
+        <div>
+          <label for="indicatif">Indicatif*</label>
+          <input type="text" id="indicatif" name="indicatif" required
+                 pattern="^\+\d{1,4}$" 
+                 title="Format: +XXX">
+        </div>
+        <div>
+          <label for="telephone">Téléphone*</label>
+          <input type="tel" id="telephone" name="telephone" required
+                 pattern="^\+?[\d\s\-]{6,15}$"
+                 title="6-15 chiffres">
+        </div>
       </div>
-      <div>
-        <label for="telephone">Téléphone</label>
-        <input type="tel" name="telephone" id="telephone" required title="Entrez un numéro valide.">
+
+      <div class="inline-group">
+        <div>
+          <label for="dateNaissance">Date de naissance*</label>
+          <input type="date" id="dateNaissance" name="dateNaissance" required
+                 max="<%= new Date().toISOString().split('T')[0] %>">
+        </div>
+        <div>
+          <label for="lieuNaissance">Lieu de naissance*</label>
+          <input type="text" id="lieuNaissance" name="lieuNaissance" required>
+        </div>
       </div>
-    </div>
 
-    <div class="inline">
-      <div>
-        <label for="dateNaissance">Date de naissance</label>
-        <input type="date" name="dateNaissance" required>
+      <label for="photo">Photo de profil*</label>
+      <input type="file" id="photo" name="photo" accept="image/*" required>
+      <p class="file-input-info">Formats acceptés: JPG, PNG (max 5MB)</p>
+
+      <label for="documents">Documents (optionnel)</label>
+      <input type="file" id="documents" name="documents" multiple 
+             accept=".pdf,.jpg,.jpeg,.png">
+      <p class="file-input-info">Formats: PDF, JPG, PNG (max 5MB par fichier)</p>
+
+      <label for="password">Mot de passe*</label>
+      <input type="password" id="password" name="password" required
+             minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$"
+             title="8 caractères min, avec majuscule, minuscule et chiffre">
+
+      <label for="role">Rôle*</label>
+      <select id="role" name="role" required>
+        <option value="" disabled selected>Sélectionnez...</option>
+        <option value="eleve">Élève</option>
+        <option value="formateur">Formateur</option>
+        <option value="administration">Administration</option>
+        <option value="autres">Autres</option>
+      </select>
+
+      <div class="checkbox-container">
+        <input type="checkbox" id="conditions" name="conditions" required>
+        <label for="conditions">J'accepte les <a href="#" target="_blank">conditions d'utilisation</a>*</label>
       </div>
-      <div>
-        <label for="lieuNaissance">Lieu de naissance</label>
-        <input type="text" name="lieuNaissance" required>
-      </div>
-    </div>
 
-    <label for="photo">Photo de profil</label>
-    <input type="file" name="photo" accept="image/*" required>
-
-    <label for="documents">Documents (PDF, JPG, PNG)</label>
-    <input type="file" name="documents" multiple accept=".pdf,.jpg,.png">
-
-    <label for="password">Mot de passe</label>
-    <input type="password" name="password" required minlength="6">
-
-    <label for="role">Rôle</label>
-    <select name="role" required>
-      <option value="eleve">Élève</option>
-      <option value="formateur">Formateur</option>
-      <option value="administration">Administration</option>
-      <option value="autres">Autres</option>
-    </select>
-
-    <div>
-      <label>
-        <input type="checkbox" name="conditions" required>
-        J’accepte les <a href="#">conditions d’utilisation</a>
-      </label>
-    </div>
-
-    <button type="submit">S'inscrire</button>
-    <!-- Bouton Annuler qui redirige vers la page d'accueil -->
-    <a href="/" class="cancel-btn">Annuler</a>
-  </form>
+      <button type="submit" class="btn-submit">S'inscrire</button>
+      <a href="/" class="btn-cancel">Annuler</a>
+    </form>
+  </div>
 
   <script>
     // Mappage des pays et indicatifs
     const indicatifs = {
       "Bénin": "+229",
       "France": "+33",
-      "Côte d’Ivoire": "+225",
+      "Côte d'Ivoire": "+225",
       "Togo": "+228",
       "Sénégal": "+221",
       "Mali": "+223",
@@ -186,28 +251,61 @@
       "Afrique du Sud": "+27"
     };
 
+    // Éléments du DOM
+    const form = document.getElementById('inscriptionForm');
     const paysInput = document.getElementById('pays');
     const indicatifInput = document.getElementById('indicatif');
     const telInput = document.getElementById('telephone');
+    const dateInput = document.getElementById('dateNaissance');
 
-    // Fonction pour mettre à jour l'indicatif
+    // Mise à jour automatique de l'indicatif
     function updateIndicatif() {
-      const selectedPays = paysInput.value;
-      indicatifInput.value = indicatifs[selectedPays] || ''; // Si le pays n'est pas trouvé, on laisse l'indicatif vide
+      const selectedPays = paysInput.value.trim();
+      if (indicatifs[selectedPays]) {
+        indicatifInput.value = indicatifs[selectedPays];
+        validatePhone();
+      }
     }
 
-    // Mettez à jour l'indicatif quand l'utilisateur saisit ou sélectionne un pays
-    paysInput.addEventListener('input', updateIndicatif);
-    paysInput.addEventListener('change', updateIndicatif);
-
-    // Validation du numéro de téléphone
-    telInput.addEventListener('input', () => {
-      // Vérifier si le numéro commence par l'indicatif
-      if (!telInput.value.startsWith(indicatifInput.value)) {
-        telInput.setCustomValidity("Le numéro doit commencer par l'indicatif.");
+    // Validation du téléphone
+    function validatePhone() {
+      const indicatif = indicatifInput.value.replace('+', '');
+      if (telInput.value && !telInput.value.startsWith(indicatif)) {
+        telInput.setCustomValidity(`Le numéro doit commencer par ${indicatif}`);
       } else {
         telInput.setCustomValidity('');
       }
+    }
+
+    // Validation des fichiers
+    function validateFiles() {
+      const photoInput = document.getElementById('photo');
+      if (photoInput.files[0] && photoInput.files[0].size > 5 * 1024 * 1024) {
+        photoInput.setCustomValidity('La photo ne doit pas dépasser 5MB');
+        return false;
+      }
+      return true;
+    }
+
+    // Événements
+    paysInput.addEventListener('input', updateIndicatif);
+    paysInput.addEventListener('change', updateIndicatif);
+    indicatifInput.addEventListener('change', validatePhone);
+    telInput.addEventListener('input', validatePhone);
+
+    // Validation avant soumission
+    form.addEventListener('submit', function(e) {
+      if (!validateFiles()) {
+        e.preventDefault();
+        alert('Veuillez vérifier les fichiers uploadés');
+      }
+    });
+
+    // Aide visuelle pour les champs requis
+    document.querySelectorAll('[required]').forEach(el => {
+      el.labels?.forEach(label => {
+        label.innerHTML += '<span style="color:red">*</span>';
+      });
     });
   </script>
 </body>
