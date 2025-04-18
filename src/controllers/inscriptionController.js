@@ -1,15 +1,6 @@
-const User = require('../models/User');
+const Inscription = require('../models/Inscription');
 const cloudinary = require('../config/cloudinary');
-const multer = require('multer');
-
-// Configuration Multer pour gérer l'upload en mémoire (temporaire)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
-// Affichage du formulaire d'inscription
-exports.showForm = (req, res) => {
-  res.render('inscription');
-};
+const bcrypt = require('bcryptjs');
 
 // Traitement de l'inscription
 exports.handleInscription = async (req, res) => {
@@ -18,19 +9,11 @@ exports.handleInscription = async (req, res) => {
     const {
       nom, prenom, email, password,
       pays, indicatif, telephone,
-      dateNaissance, lieuNaissance, role
+      dateNaissance, lieuNaissance, role, conditions
     } = req.body;
 
-    // Validation : conditions d'utilisation
-    if (!req.body.conditions) {
-      return res.render('inscription', {
-        error: "Vous devez accepter les conditions d'utilisation.",
-        formData: req.body
-      });
-    }
-
     // Vérification de l'unicité de l'email
-    const emailExist = await User.findOne({ email });
+    const emailExist = await Inscription.findOne({ email });
     if (emailExist) {
       return res.render('inscription', {
         error: "Cet email est déjà utilisé.",
@@ -38,13 +21,25 @@ exports.handleInscription = async (req, res) => {
       });
     }
 
+    // Vérification si l'utilisateur a accepté les conditions
+    if (!conditions) {
+      return res.render('inscription', {
+        error: "Vous devez accepter les conditions d'utilisation.",
+        formData: req.body
+      });
+    }
+
     // Gestion de l'upload de la photo de profil
     let photoUrl = '';
+    let photoPublicId = '';
     if (req.files && req.files.photo && req.files.photo[0]) {
       const photoUpload = await cloudinary.uploader.upload_stream(
         { folder: "eni/photos" },
         (error, result) => {
-          if (result) photoUrl = result.secure_url;
+          if (result) {
+            photoUrl = result.secure_url;
+            photoPublicId = result.public_id;
+          }
         }
       );
       req.files.photo[0].stream.pipe(photoUpload);
@@ -52,32 +47,43 @@ exports.handleInscription = async (req, res) => {
 
     // Gestion de l'upload des documents
     let documentUrls = [];
+    let documentPublicIds = [];
     if (req.files && req.files.documents) {
       for (const file of req.files.documents) {
         const uploadStream = cloudinary.uploader.upload_stream(
           { folder: "eni/documents", resource_type: "auto" },
           (error, result) => {
-            if (result) documentUrls.push(result.secure_url);
+            if (result) {
+              documentUrls.push(result.secure_url);
+              documentPublicIds.push(result.public_id);
+            }
           }
         );
         file.stream.pipe(uploadStream);
       }
     }
 
+    // Hachage du mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Création du nouvel utilisateur
-    const newUser = new User({
+    const newUser = new Inscription({
       nom,
       prenom,
       email,
-      password,
+      password: hashedPassword,
       pays,
       indicatif,
       telephone,
       dateNaissance,
       lieuNaissance,
-      photo: photoUrl,
-      documents: documentUrls,
-      role
+      role,
+      conditions,
+      photo: { url: photoUrl, public_id: photoPublicId },
+      documents: req.files.documents ? req.files.documents.map((file, index) => ({
+        url: documentUrls[index],
+        public_id: documentPublicIds[index]
+      })) : [],
     });
 
     // Sauvegarde de l'utilisateur dans la base de données
