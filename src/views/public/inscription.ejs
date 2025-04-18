@@ -107,7 +107,7 @@
       </div>
       <div>
         <label for="telephone">Téléphone</label>
-        <input type="tel" name="telephone" pattern="\\d{6,15}" required title="Entrez un numéro valide.">
+        <input type="tel" name="telephone" id="telephone" pattern="\\d{6,15}" required title="Entrez un numéro valide.">
       </div>
     </div>
 
@@ -172,9 +172,25 @@
 
     const paysInput = document.getElementById('pays');
     const indicatifInput = document.getElementById('indicatif');
+    const telInput = document.getElementById('telephone');
 
-    paysInput.addEventListener('input', () => {
-      indicatifInput.value = indicatifs[paysInput.value] || '';
+    // Fonction pour mettre à jour l'indicatif
+    function updateIndicatif() {
+      const selectedPays = paysInput.value;
+      indicatifInput.value = indicatifs[selectedPays] || '';
+    }
+
+    // Mettez à jour l'indicatif quand l'utilisateur saisit ou sélectionne un pays
+    paysInput.addEventListener('input', updateIndicatif);
+    paysInput.addEventListener('change', updateIndicatif);
+
+    // Validation du numéro de téléphone
+    telInput.addEventListener('input', () => {
+      if (!telInput.value.startsWith(indicatifInput.value)) {
+        telInput.setCustomValidity("Le numéro doit commencer par l'indicatif.");
+      } else {
+        telInput.setCustomValidity('');
+      }
     });
   </script>
 </body>
