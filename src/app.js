@@ -16,7 +16,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Connexion MongoDB (avec gestion d'erreur améliorée)
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/eni-abomey', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://eni_user:Barack122021@cluster0.mongodb.net/EleveInstituteur?retryWrites=true&w=majority', {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000
 })
