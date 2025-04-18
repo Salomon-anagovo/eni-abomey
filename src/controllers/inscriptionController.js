@@ -1,89 +1,91 @@
-const Inscription = require('../models/Inscription');
-const bcrypt = require('bcryptjs');
-const cloudinary = require('cloudinary').v2;
-const { v4: uuidv4 } = require('uuid');
+const User = require('../models/User');
+const cloudinary = require('../config/cloudinary');
+const multer = require('multer');
 
-// Configuration Cloudinary (à ne pas oublier dans un fichier de config idéalement)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dsyfvqez3',
-  api_key: process.env.CLOUDINARY_API_KEY || '457376748291975',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'b6MHplyw3UGs9lqlKM-2x0Lklj8'
-});
+// Multer config local temporaire (utile si tu veux aussi garder une copie locale)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-exports.inscriptionPost = async (req, res) => {
+exports.showForm = (req, res) => {
+  res.render('inscription');
+};
+
+exports.handleInscription = async (req, res) => {
   try {
     const {
-      nom,
-      prenom,
-      email,
-      telephone,
-      pays,
-      indicatif,
-      dateNaissance,
-      lieuNaissance,
-      role,
-      password,
-      conditions
+      nom, prenom, email, password,
+      pays, indicatif, telephone,
+      dateNaissance, lieuNaissance, role
     } = req.body;
 
-    // Vérifications de base
-    if (!conditions) {
-      return res.render('inscription', { error: 'Vous devez accepter les conditions d’utilisation.' });
+    if (!req.body.conditions) {
+      return res.render('inscription', {
+        error: "Vous devez accepter les conditions d'utilisation.",
+        formData: req.body
+      });
     }
 
-    const existingUser = await Inscription.findOne({ email });
-    if (existingUser) {
-      return res.render('inscription', { error: 'Cet email est déjà utilisé.' });
+    // Vérification de l'unicité de l'email
+    const emailExist = await User.findOne({ email });
+    if (emailExist) {
+      return res.render('inscription', {
+        error: "Cet email est déjà utilisé.",
+        formData: req.body
+      });
     }
 
     // Upload de la photo
     let photoUrl = '';
     if (req.files && req.files.photo && req.files.photo[0]) {
-      const result = await cloudinary.uploader.upload(req.files.photo[0].path, {
-        folder: 'eni_inscriptions/photos',
-        public_id: uuidv4()
-      });
-      photoUrl = result.secure_url;
+      const photoUpload = await cloudinary.uploader.upload_stream(
+        { folder: "eni/photos" },
+        (error, result) => {
+          if (result) photoUrl = result.secure_url;
+        }
+      );
+      req.files.photo[0].stream.pipe(photoUpload);
     }
 
     // Upload des documents
     let documentUrls = [];
     if (req.files && req.files.documents) {
-      for (const doc of req.files.documents) {
-        const result = await cloudinary.uploader.upload(doc.path, {
-          folder: 'eni_inscriptions/documents',
-          public_id: uuidv4(),
-          resource_type: 'auto'
-        });
-        documentUrls.push(result.secure_url);
+      for (const file of req.files.documents) {
+        const upload = await cloudinary.uploader.upload_stream(
+          { folder: "eni/documents", resource_type: "auto" },
+          (error, result) => {
+            if (result) documentUrls.push(result.secure_url);
+          }
+        );
+        file.stream.pipe(upload);
       }
     }
 
-    // Hash du mot de passe
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new Inscription({
+    const newUser = new User({
       nom,
       prenom,
       email,
-      telephone,
+      password,
       pays,
       indicatif,
+      telephone,
       dateNaissance,
       lieuNaissance,
-      role,
-      password: hashedPassword,
-      conditions: true,
       photo: photoUrl,
       documents: documentUrls,
-      confirmationToken: uuidv4(),
-      confirmed: false
+      role
     });
 
     await newUser.save();
-    return res.redirect('/confirmation');
-  } catch (err) {
-    console.error(err);
-    res.render('inscription', { error: "Une erreur s’est produite lors de l'inscription." });
+
+    return res.render('inscription', {
+      success: "Inscription réussie ! Vous pouvez maintenant vous connecter.",
+    });
+
+  } catch (error) {
+    console.error("Erreur d'inscription:", error);
+    res.render('inscription', {
+      error: "Une erreur est survenue. Veuillez réessayer.",
+      formData: req.body
+    });
   }
 };
