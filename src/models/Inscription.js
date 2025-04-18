@@ -55,7 +55,7 @@ const inscriptionSchema = new Schema({
       delete ret.password;
       delete ret.confirmationToken;
       return ret;
-    }
+    }, { collection: 'inscriptions' }); // Force explicitement le nom de collection
   }
 });
 
