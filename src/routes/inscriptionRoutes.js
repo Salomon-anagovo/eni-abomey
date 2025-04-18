@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
   }
 });
 
-// Filtre des fichiers
+// Filtre des fichiers autorisés
 const fileFilter = (req, file, cb) => {
   const fileTypes = /jpeg|jpg|png|pdf/; // Types de fichiers autorisés
   const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
@@ -35,10 +35,10 @@ const upload = multer({
   fileFilter: fileFilter
 }).fields([
   { name: 'photo', maxCount: 1 }, // Photo de profil
-  { name: 'documents', maxCount: 10 } // Documents (maximum 5 fichiers)
+  { name: 'documents', maxCount: 10 } // Documents (maximum 10 fichiers)
 ]);
 
 // Route d'inscription - POST
-router.post('/inscription', upload, inscriptionController.inscriptionPost);
+router.post('/inscription', upload, inscriptionController.handleInscription);
 
 module.exports = router;
