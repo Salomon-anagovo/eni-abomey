@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Définition du modèle Inscription
 const inscriptionSchema = new Schema({
   nom: {
     type: String,
@@ -18,7 +17,7 @@ const inscriptionSchema = new Schema({
     lowercase: true,
     validate: {
       validator: function(v) {
-        return /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/.test(v);
+        return /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(v);
       },
       message: props => `${props.value} n'est pas une adresse email valide !`
     }
@@ -54,13 +53,19 @@ const inscriptionSchema = new Schema({
     enum: ['eleve', 'formateur', 'administration', 'autres'],
     default: 'eleve'
   },
+
+  // ✅ Photo stockée sur Cloudinary
   photo: {
-    type: String, // Le chemin vers l'image téléchargée
-    required: true
+    url: { type: String, required: true },
+    public_id: { type: String, required: true }
   },
+
+  // ✅ Documents multiples sur Cloudinary
   documents: [{
-    type: String // Chemin des documents téléchargés
+    url: { type: String },
+    public_id: { type: String }
   }],
+
   password: {
     type: String,
     required: true
@@ -82,7 +87,6 @@ const inscriptionSchema = new Schema({
   }
 }, { timestamps: true });
 
-// Création du modèle Inscription
 const Inscription = mongoose.model('Inscription', inscriptionSchema);
 
 module.exports = Inscription;
