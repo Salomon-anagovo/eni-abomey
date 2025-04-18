@@ -42,11 +42,13 @@
     .inline > div {
       flex: 1;
     }
-    .error {
-      color: red;
+    .error, .success {
       margin-bottom: 1rem;
       text-align: center;
+      font-weight: bold;
     }
+    .error { color: red; }
+    .success { color: green; }
     button {
       margin-top: 1.5rem;
       width: 100%;
@@ -61,45 +63,50 @@
   </style>
 </head>
 <body>
-  <form action="/inscription" method="POST" enctype="multipart/form-data">
+  <form action="/inscription" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
     <h1>Formulaire d'inscription</h1>
 
+    <% if (typeof success !== 'undefined') { %>
+      <p class="success"><%= success %></p>
+    <% } %>
     <% if (typeof error !== 'undefined') { %>
       <p class="error"><%= error %></p>
     <% } %>
 
     <label for="nom">Nom</label>
-    <input type="text" name="nom" required>
+    <input type="text" name="nom" value="<%= typeof formData !== 'undefined' ? formData.nom : '' %>" required>
 
     <label for="prenom">Prénom</label>
-    <input type="text" name="prenom" required>
+    <input type="text" name="prenom" value="<%= typeof formData !== 'undefined' ? formData.prenom : '' %>" required>
 
     <label for="email">Email</label>
-    <input type="email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" title="Entrez une adresse email valide.">
+    <input type="email" name="email" id="email" value="<%= typeof formData !== 'undefined' ? formData.email : '' %>" required>
 
     <div class="inline">
       <div>
         <label for="pays">Pays</label>
-        <select id="pays" name="pays" required></select>
+        <select id="pays" name="pays" required>
+          <option value="">-- Sélectionnez un pays --</option>
+        </select>
       </div>
       <div>
         <label for="indicatif">Indicatif</label>
-        <input type="text" id="indicatif" name="indicatif" readonly>
+        <input type="text" id="indicatif" name="indicatif" value="<%= typeof formData !== 'undefined' ? formData.indicatif : '' %>" readonly>
       </div>
       <div>
         <label for="telephone">Téléphone</label>
-        <input type="tel" name="telephone" pattern="\\d{6,15}" required title="Entrez un numéro valide.">
+        <input type="tel" name="telephone" id="telephone" pattern="\\d{6,15}" value="<%= typeof formData !== 'undefined' ? formData.telephone : '' %>" required>
       </div>
     </div>
 
     <div class="inline">
       <div>
         <label for="dateNaissance">Date de naissance</label>
-        <input type="date" name="dateNaissance" required>
+        <input type="date" name="dateNaissance" value="<%= typeof formData !== 'undefined' ? formData.dateNaissance : '' %>" required>
       </div>
       <div>
         <label for="lieuNaissance">Lieu de naissance</label>
-        <input type="text" name="lieuNaissance" required>
+        <input type="text" name="lieuNaissance" value="<%= typeof formData !== 'undefined' ? formData.lieuNaissance : '' %>" required>
       </div>
     </div>
 
@@ -110,7 +117,7 @@
     <input type="file" name="documents" multiple accept=".pdf,.jpg,.png">
 
     <label for="password">Mot de passe</label>
-    <input type="password" name="password" required minlength="6">
+    <input type="password" name="password" minlength="6" required>
 
     <label for="role">Rôle</label>
     <select name="role" required>
@@ -132,39 +139,46 @@
 
   <script>
     const indicatifs = {
-      "Bénin": "+229",
-      "France": "+33",
-      "Côte d’Ivoire": "+225",
-      "Togo": "+228",
-      "Sénégal": "+221",
-      "Mali": "+223",
-      "Niger": "+227",
-      "Burkina Faso": "+226",
-      "Cameroun": "+237",
-      "Canada": "+1",
-      "USA": "+1",
-      "RDC": "+243",
-      "Rwanda": "+250",
-      "Algérie": "+213",
-      "Maroc": "+212",
-      "Tunisie": "+216",
-      "Afrique du Sud": "+27"
-      // Tu peux en ajouter beaucoup plus si tu veux
+      "Bénin": "+229", "France": "+33", "Côte d’Ivoire": "+225",
+      "Togo": "+228", "Sénégal": "+221", "Mali": "+223", "Niger": "+227",
+      "Burkina Faso": "+226", "Cameroun": "+237", "Canada": "+1",
+      "USA": "+1", "RDC": "+243", "Rwanda": "+250", "Algérie": "+213",
+      "Maroc": "+212", "Tunisie": "+216", "Afrique du Sud": "+27"
     };
 
     const paysSelect = document.getElementById('pays');
     const indicatifInput = document.getElementById('indicatif');
 
-    Object.keys(indicatifs).forEach(pays => {
+    for (const [pays, indicatif] of Object.entries(indicatifs)) {
       const option = document.createElement('option');
       option.value = pays;
       option.textContent = pays;
+      if ("<%= typeof formData !== 'undefined' ? formData.pays : '' %>" === pays) option.selected = true;
       paysSelect.appendChild(option);
-    });
+    }
 
     paysSelect.addEventListener('change', () => {
       indicatifInput.value = indicatifs[paysSelect.value] || '';
     });
+
+    function validateForm() {
+      const email = document.getElementById('email').value;
+      const tel = document.getElementById('telephone').value;
+
+      const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+      const phonePattern = /^\d{6,15}$/;
+
+      if (!emailPattern.test(email)) {
+        alert('Email invalide.');
+        return false;
+      }
+      if (!phonePattern.test(tel)) {
+        alert('Numéro de téléphone invalide.');
+        return false;
+      }
+
+      return true;
+    }
   </script>
 </body>
 </html>
