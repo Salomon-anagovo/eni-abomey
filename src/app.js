@@ -35,7 +35,7 @@ app.use('/confirmation', confirmationRoute);
 
 // Sessions
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'secret-32-caracteres-minimum',
+  secret: process.env.SESSION_SECRET || 'm0nAppS3cretK3y',
   store: MongoStore.create({ mongoUrl: mongoose.connection.client.s.url }),
   resave: false,
   saveUninitialized: false,
@@ -57,7 +57,7 @@ app.use((err, req, res, next) => {
 });
 
 // Démarrage
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });
