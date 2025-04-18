@@ -1,44 +1,63 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const inscriptionController = require('../controllers/inscriptionController');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const Inscription = require('../models/Inscription');
+const sendConfirmationEmail = require('../utils/sendConfirmationEmail');
 
-// Configuration de multer pour l'upload des fichiers (photo et documents)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'tmp/'); // Dossier temporaire pour l'upload avant Cloudinary
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname); // Extension du fichier
-    cb(null, Date.now() + ext); // On utilise un nom unique basé sur le timestamp
+// Affichage du formulaire
+router.get('/', (req, res) => {
+  res.render('public/inscription', {
+    title: 'Inscription',
+    currentYear: new Date().getFullYear(),
+    success: req.query.success
+  });
+});
+
+// Traitement du formulaire
+router.post('/', async (req, res) => {
+  const { nom, prenom, email, telephone, pays, role, password } = req.body;
+
+  if (!nom || !prenom || !email || !telephone || !pays || !role || !password) {
+    return res.redirect('/inscription?error=Veuillez remplir tous les champs');
+  }
+
+  try {
+    const existing = await Inscription.findOne({ email });
+    if (existing) {
+      return res.redirect('/inscription?error=Cet email est déjà inscrit');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const token = crypto.randomBytes(20).toString('hex');
+
+    const newUser = await Inscription.create({
+      nom, prenom, email, telephone, pays, role,
+      password: hashedPassword,
+      confirmationToken: token
+    });
+
+    await sendConfirmationEmail(email, token);
+
+    res.redirect('/inscription?success=Inscription réussie ! Veuillez vérifier votre email.');
+  } catch (err) {
+    console.error(err);
+    res.redirect('/inscription?error=Une erreur est survenue.');
   }
 });
 
-// Filtre des fichiers autorisés
-const fileFilter = (req, file, cb) => {
-  const fileTypes = /jpeg|jpg|png|pdf/; // Types de fichiers autorisés
-  const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = fileTypes.test(file.mimetype);
-
-  if (extname && mimetype) {
-    return cb(null, true);
-  } else {
-    cb(new Error('Seuls les fichiers .jpg, .png, .jpeg, .pdf sont autorisés.'));
+// Confirmation d'email
+router.get('/confirmation/:token', async (req, res) => {
+  const user = await Inscription.findOne({ confirmationToken: req.params.token });
+  if (!user) {
+    return res.send('Lien invalide ou expiré.');
   }
-};
 
-// Création d'un middleware multer pour gérer les fichiers
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Limite la taille des fichiers à 10MB
-  fileFilter: fileFilter
-}).fields([
-  { name: 'photo', maxCount: 1 }, // Photo de profil
-  { name: 'documents', maxCount: 10 } // Documents (maximum 10 fichiers)
-]);
+  user.confirmed = true;
+  user.confirmationToken = undefined;
+  await user.save();
 
-// Route d'inscription - POST
-router.post('/inscription', upload, inscriptionController.handleInscription);
+  res.send('Votre inscription a été confirmée avec succès ! Vous pouvez maintenant vous connecter.');
+});
 
 module.exports = router;
