@@ -59,8 +59,4 @@ const inscriptionSchema = new Schema({
   }
 });
 
-// Index pour améliorer les performances
-inscriptionSchema.index({ email: 1 });
-inscriptionSchema.index({ telephone: 1 });
-
 module.exports = mongoose.model('Inscription', inscriptionSchema);
