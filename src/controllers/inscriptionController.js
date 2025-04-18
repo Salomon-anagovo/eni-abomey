@@ -1,54 +1,89 @@
-const User = require('../models/User');
+const Inscription = require('../models/Inscription');
 const bcrypt = require('bcryptjs');
-const multer = require('multer');
-const path = require('path');
-const { validationResult } = require('express-validator');
+const cloudinary = require('cloudinary').v2;
+const { v4: uuidv4 } = require('uuid');
 
-// Config pour Multer (upload des fichiers)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+// Configuration Cloudinary (à ne pas oublier dans un fichier de config idéalement)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dsyfvqez3',
+  api_key: process.env.CLOUDINARY_API_KEY || '457376748291975',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'b6MHplyw3UGs9lqlKM-2x0Lklj8'
 });
-const upload = multer({ storage });
 
-// Route pour l'inscription
-app.post('/inscription', upload.fields([{ name: 'photo' }, { name: 'documents' }]), async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.render('inscription', {
-      error: "Veuillez remplir tous les champs correctement."
+exports.inscriptionPost = async (req, res) => {
+  try {
+    const {
+      nom,
+      prenom,
+      email,
+      telephone,
+      pays,
+      indicatif,
+      dateNaissance,
+      lieuNaissance,
+      role,
+      password,
+      conditions
+    } = req.body;
+
+    // Vérifications de base
+    if (!conditions) {
+      return res.render('inscription', { error: 'Vous devez accepter les conditions d’utilisation.' });
+    }
+
+    const existingUser = await Inscription.findOne({ email });
+    if (existingUser) {
+      return res.render('inscription', { error: 'Cet email est déjà utilisé.' });
+    }
+
+    // Upload de la photo
+    let photoUrl = '';
+    if (req.files && req.files.photo && req.files.photo[0]) {
+      const result = await cloudinary.uploader.upload(req.files.photo[0].path, {
+        folder: 'eni_inscriptions/photos',
+        public_id: uuidv4()
+      });
+      photoUrl = result.secure_url;
+    }
+
+    // Upload des documents
+    let documentUrls = [];
+    if (req.files && req.files.documents) {
+      for (const doc of req.files.documents) {
+        const result = await cloudinary.uploader.upload(doc.path, {
+          folder: 'eni_inscriptions/documents',
+          public_id: uuidv4(),
+          resource_type: 'auto'
+        });
+        documentUrls.push(result.secure_url);
+      }
+    }
+
+    // Hash du mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new Inscription({
+      nom,
+      prenom,
+      email,
+      telephone,
+      pays,
+      indicatif,
+      dateNaissance,
+      lieuNaissance,
+      role,
+      password: hashedPassword,
+      conditions: true,
+      photo: photoUrl,
+      documents: documentUrls,
+      confirmationToken: uuidv4(),
+      confirmed: false
     });
+
+    await newUser.save();
+    return res.redirect('/confirmation');
+  } catch (err) {
+    console.error(err);
+    res.render('inscription', { error: "Une erreur s’est produite lors de l'inscription." });
   }
-
-  // Vérification si les conditions sont acceptées
-  if (!req.body.conditions) {
-    return res.render('inscription', {
-      error: "Vous devez accepter les conditions d'utilisation."
-    });
-  }
-
-  // Hash du mot de passe
-  const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
-  const newUser = new User({
-    nom: req.body.nom,
-    prenom: req.body.prenom,
-    email: req.body.email,
-    telephone: req.body.telephone,
-    dateNaissance: req.body.dateNaissance,
-    lieuNaissance: req.body.lieuNaissance,
-    role: req.body.role,
-    pays: req.body.pays,
-    indicatif: req.body.indicatif,
-    photo: req.files.photo[0].path,
-    documents: req.files.documents ? req.files.documents.map(file => file.path) : [],
-    password: hashedPassword
-  });
-
-  await newUser.save();
-  res.redirect('/connexion');
-});
+};
