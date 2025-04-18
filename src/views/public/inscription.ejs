@@ -150,6 +150,7 @@
   </form>
 
   <script>
+    // Mappage des pays et indicatifs
     const indicatifs = {
       "Bénin": "+229",
       "France": "+33",
@@ -177,7 +178,7 @@
     // Fonction pour mettre à jour l'indicatif
     function updateIndicatif() {
       const selectedPays = paysInput.value;
-      indicatifInput.value = indicatifs[selectedPays] || '';
+      indicatifInput.value = indicatifs[selectedPays] || ''; // Si le pays n'est pas trouvé, on laisse l'indicatif vide
     }
 
     // Mettez à jour l'indicatif quand l'utilisateur saisit ou sélectionne un pays
@@ -186,6 +187,7 @@
 
     // Validation du numéro de téléphone
     telInput.addEventListener('input', () => {
+      // Vérifier si le numéro commence par l'indicatif
       if (!telInput.value.startsWith(indicatifInput.value)) {
         telInput.setCustomValidity("Le numéro doit commencer par l'indicatif.");
       } else {
