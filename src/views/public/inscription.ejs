@@ -1,101 +1,170 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Inscription publique</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inscription | ENI Abomey</title>
+  <link rel="stylesheet" href="/css/style.css" />
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9f9f9;
       padding: 2rem;
-      background-color: #f4f4f4;
     }
-
+    form {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
     h1 {
       text-align: center;
       margin-bottom: 1.5rem;
     }
-
-    form {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
     label {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-top: 1rem;
       font-weight: bold;
     }
-
-    input, select {
+    input, select, textarea {
       width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      border-radius: 5px;
+      padding: 10px;
+      margin-top: .5rem;
       border: 1px solid #ccc;
+      border-radius: 6px;
     }
-
-    .buttons {
+    .inline {
       display: flex;
-      justify-content: space-between;
+      gap: 1rem;
     }
-
+    .inline > div {
+      flex: 1;
+    }
+    .error {
+      color: red;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
     button {
-      padding: 0.75rem 1.5rem;
-      background-color: #007bff;
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 1rem;
+      background: #2c3e50;
       color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
       font-weight: bold;
-    }
-
-    button.cancel {
-      background-color: #6c757d;
-    }
-
-    button:hover {
-      opacity: 0.9;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>Formulaire d'inscription publique</h1>
-  <form action="/inscription" method="POST">
+  <form action="/inscription" method="POST" enctype="multipart/form-data">
+    <h1>Formulaire d'inscription</h1>
+
+    <% if (typeof error !== 'undefined') { %>
+      <p class="error"><%= error %></p>
+    <% } %>
+
     <label for="nom">Nom</label>
-    <input type="text" name="nom" id="nom" required>
+    <input type="text" name="nom" required>
 
     <label for="prenom">Prénom</label>
-    <input type="text" name="prenom" id="prenom" required>
+    <input type="text" name="prenom" required>
 
     <label for="email">Email</label>
-    <input type="email" name="email" id="email" required>
+    <input type="email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" title="Entrez une adresse email valide.">
 
-    <label for="telephone">Téléphone</label>
-    <input type="text" name="telephone" id="telephone" required>
+    <div class="inline">
+      <div>
+        <label for="pays">Pays</label>
+        <select id="pays" name="pays" required></select>
+      </div>
+      <div>
+        <label for="indicatif">Indicatif</label>
+        <input type="text" id="indicatif" name="indicatif" readonly>
+      </div>
+      <div>
+        <label for="telephone">Téléphone</label>
+        <input type="tel" name="telephone" pattern="\\d{6,15}" required title="Entrez un numéro valide.">
+      </div>
+    </div>
 
-    <label for="pays">Pays</label>
-    <input type="text" name="pays" id="pays" required>
+    <div class="inline">
+      <div>
+        <label for="dateNaissance">Date de naissance</label>
+        <input type="date" name="dateNaissance" required>
+      </div>
+      <div>
+        <label for="lieuNaissance">Lieu de naissance</label>
+        <input type="text" name="lieuNaissance" required>
+      </div>
+    </div>
 
-    <label for="role">Rôle</label>
-    <select name="role" id="role" required>
-      <option value="eleve">Élève</option>
-      <option value="formateur">Formateur</option>
-      <option value="admin">Admin</option>
-      <option value="autre">Autre</option>
-    </select>
+    <label for="photo">Photo de profil</label>
+    <input type="file" name="photo" accept="image/*" required>
+
+    <label for="documents">Documents (PDF, JPG, PNG)</label>
+    <input type="file" name="documents" multiple accept=".pdf,.jpg,.png">
 
     <label for="password">Mot de passe</label>
-    <input type="password" name="password" id="password" required>
+    <input type="password" name="password" required minlength="6">
 
-    <div class="buttons">
-      <button type="submit">S'inscrire</button>
-      <button type="button" class="cancel" onclick="window.location.href='/'">Annuler</button>
+    <label for="role">Rôle</label>
+    <select name="role" required>
+      <option value="eleve">Élève</option>
+      <option value="formateur">Formateur</option>
+      <option value="administration">Administration</option>
+      <option value="autres">Autres</option>
+    </select>
+
+    <div>
+      <label>
+        <input type="checkbox" name="conditions" required>
+        J’accepte les <a href="#">conditions d’utilisation</a>
+      </label>
     </div>
+
+    <button type="submit">S'inscrire</button>
   </form>
+
+  <script>
+    const indicatifs = {
+      "Bénin": "+229",
+      "France": "+33",
+      "Côte d’Ivoire": "+225",
+      "Togo": "+228",
+      "Sénégal": "+221",
+      "Mali": "+223",
+      "Niger": "+227",
+      "Burkina Faso": "+226",
+      "Cameroun": "+237",
+      "Canada": "+1",
+      "USA": "+1",
+      "RDC": "+243",
+      "Rwanda": "+250",
+      "Algérie": "+213",
+      "Maroc": "+212",
+      "Tunisie": "+216",
+      "Afrique du Sud": "+27"
+      // Tu peux en ajouter beaucoup plus si tu veux
+    };
+
+    const paysSelect = document.getElementById('pays');
+    const indicatifInput = document.getElementById('indicatif');
+
+    Object.keys(indicatifs).forEach(pays => {
+      const option = document.createElement('option');
+      option.value = pays;
+      option.textContent = pays;
+      paysSelect.appendChild(option);
+    });
+
+    paysSelect.addEventListener('change', () => {
+      indicatifInput.value = indicatifs[paysSelect.value] || '';
+    });
+  </script>
 </body>
 </html>
